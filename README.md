@@ -1,47 +1,47 @@
-# Svelte + Vite
+# Log Viewer
 
-This template should help get you started developing with Svelte in Vite.
+This is a lightweight and responsive log viewer application built with **Svelte** and **Vite**.
 
-## Recommended IDE Setup
+## Status
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+This project is currently in **active development**.
 
-## Need an official Svelte framework?
+## Goal
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+The goal is to create a **simple web-based log viewer** for JSON logs. It aims to offer:
 
-## Technical considerations
+- Real-time and fast rendering, even for large logs (10MB+)
+- Efficient filtering on:
+  - Log level (multi-select)
+  - Timestamp (range and recent)
+  - Fields like filename, function name, message content (include/exclude)
+- Clean and intuitive user interface with:
+  - Infinite scrolling
+  - Color-coded log levels
+  - Dynamic column visibility, order, and layout
+  - Copy/paste and filtering via text highlight
+  - Dark mode
 
-**Why use this over SvelteKit?**
+## Tech Stack
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+- [Svelte](https://svelte.dev/)
+- [Vite](https://vitejs.dev/)
+- Plain HTML/JS for fast prototyping
 
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+## Project Structure
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+- `src/` – Svelte components and main logic
+- `public/` – Static assets (e.g. sample log files like `log.json`)
+- `.gitignore` – Includes `node_modules/`, SvelteKit artifacts, and optionally large logs
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+## Notes
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+- Current implementation uses a local JSON log file (`public/log.json`)
+- Real-time log tailing and multi-file support planned for future updates
 
-**Why include `.vscode/extensions.json`?**
+## Local Development
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `checkJs` in the JS template?**
-
-It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/sveltejs/svelte-hmr/tree/master/packages/svelte-hmr#preservation-of-local-state).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```js
-// store.js
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+npm install
+npm run dev
 ```
