@@ -22,7 +22,7 @@
     filename: '150px',
     lineno: '80px',
     funcName: '120px',
-    message: '500px',
+    message: '1000px',
   };
 
   let activeCellContent = null; // Tracks the content of the clicked cell
@@ -102,7 +102,7 @@
     filteredLogs = logs.filter(log => {
       const logTime = new Date(log.asctime);
 
-      return (!from || logTime > new Date(from)) && (!until || logTime < new Date(until));
+      return (!from || logTime >= new Date(from)) && (!until || logTime <= new Date(until));
     });
   }
 
@@ -349,12 +349,20 @@
 {/if}
 
 <style>
+  :global(#app) {
+    margin-left: 20px;
+    margin-right: 20px;
+    padding: 0; /* Remove any padding from the app container */
+  }
+
   table {
     border-collapse: collapse;
     width: 100%; /* Ensure the table fits within the window */
     table-layout: fixed; /* Prevent resizing based on content */
     margin: 0 auto; /* Center the table horizontally */
+    padding: 0;
   }
+
   th, td {
     border: 1px solid #ccc;
     padding: 0.4rem 0.6rem;
@@ -363,24 +371,30 @@
     overflow: hidden; /* Hide overflow content */
     text-overflow: ellipsis; /* Add ellipsis for overflow content */
   }
+
   td div {
     overflow-x: auto; /* Enable horizontal scrolling for cell content */
     white-space: nowrap; /* Prevent wrapping of text */
   }
+
   td div::-webkit-scrollbar {
     height: 5px; /* Set scrollbar thickness */
   }
+
   td div::-webkit-scrollbar-thumb {
     background: #ccc; /* Set scrollbar thumb color */
     border-radius: 3px; /* Round scrollbar edges */
   }
+
   td div::-webkit-scrollbar-track {
     background: #f1f1f1; /* Set scrollbar track color */
   }
+
   th {
     background: #eee;
     position: relative; /* Ensure filter dropdown is positioned correctly */
   }
+
   tbody tr:nth-child(even) {
     background: #f9f9f9;
   }
