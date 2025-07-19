@@ -31,7 +31,6 @@
 
   function showCellContent(event, content) {
     if (activeCellContent === content) {
-      // If the same cell is clicked again, close the subwindow
       activeCellContent = null;
       activeCellPosition = null;
     } else {
@@ -40,8 +39,8 @@
       activeCellContent = content;
       activeCellPosition = {
         top: rect.bottom + window.scrollY,
-        left: tableRect.left + window.scrollX, // Align to the left of the table
-        width: tableRect.width, // Match the width of the table
+        left: Math.min(rect.left, tableRect.right - rect.width), // Align left unless it overflows
+        width: Math.min(rect.width, tableRect.width), // Ensure width fits within the table
       };
     }
   }
@@ -339,7 +338,7 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class="subwindow"
-    style={`position: absolute; top: ${activeCellPosition.top}px; left: ${activeCellPosition.left}px; width: ${activeCellPosition.width}px; background: #fff; border: 1px solid #ccc; padding: 0.4rem 0.6rem; z-index: 20; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);`}
+    style={`position: absolute; top: ${activeCellPosition.top}px; left: ${activeCellPosition.left}px; max-width: calc(100vw - 40px); background: #fff; border: 1px solid #ccc; padding: 0.4rem 0.6rem; z-index: 20; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);`}
     on:mouseleave={closeOnHoverOutside ? hideCellContent : null}
   >
     <div style="white-space: pre-wrap; word-wrap: break-word; font-size: inherit; font-family: inherit; text-align: left;">
