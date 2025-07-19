@@ -22,7 +22,7 @@
     filename: '150px',
     lineno: '80px',
     funcName: '120px',
-    message: '300px',
+    message: '500px',
   };
 
   let activeCellContent = null; // Tracks the content of the clicked cell
@@ -318,6 +318,8 @@
         <tr>
           {#each Object.entries(log) as [key, value]}
             <td style={`width: ${COLUMN_WIDTHS[key] || 'auto'};`}>
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
               <div 
                 style="overflow-x: auto; white-space: nowrap; cursor: pointer;" 
                 on:click={(event) => showCellContent(event, value)}
@@ -334,6 +336,7 @@
 
 {#if activeCellContent}
   <!-- Conditional event binding -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class="subwindow"
     style={`position: absolute; top: ${activeCellPosition.top}px; left: ${activeCellPosition.left}px; width: ${activeCellPosition.width}px; background: #fff; border: 1px solid #ccc; padding: 0.4rem 0.6rem; z-index: 20; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);`}
