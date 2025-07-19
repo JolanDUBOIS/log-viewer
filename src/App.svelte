@@ -27,19 +27,27 @@
 
   let activeCellContent = null; // Tracks the content of the clicked cell
   let activeCellPosition = null; // Tracks the position of the sub-element
+  let closeOnHoverOutside = false; // Boolean to toggle hover-based closing
 
   function showCellContent(event, content) {
-    const rect = event.target.getBoundingClientRect();
-    const tableRect = document.querySelector("table").getBoundingClientRect();
-    activeCellContent = content;
-    activeCellPosition = {
-      top: rect.bottom + window.scrollY,
-      left: tableRect.left + window.scrollX, // Align to the left of the table
-      width: tableRect.width, // Match the width of the table
-    };
+    if (activeCellContent === content) {
+      // If the same cell is clicked again, close the subwindow
+      activeCellContent = null;
+      activeCellPosition = null;
+    } else {
+      const rect = event.target.getBoundingClientRect();
+      const tableRect = document.querySelector("table").getBoundingClientRect();
+      activeCellContent = content;
+      activeCellPosition = {
+        top: rect.bottom + window.scrollY,
+        left: tableRect.left + window.scrollX, // Align to the left of the table
+        width: tableRect.width, // Match the width of the table
+      };
+    }
   }
 
   function hideCellContent() {
+    if (!closeOnHoverOutside) return; // Only hide if hover-based closing is enabled
     activeCellContent = null;
     activeCellPosition = null;
   }
@@ -48,7 +56,8 @@
     const subWindow = document.querySelector(".subwindow");
     const clickedCell = event.target.closest("td div");
     if (subWindow && !subWindow.contains(event.target) && !clickedCell) {
-      hideCellContent();
+      activeCellContent = null;
+      activeCellPosition = null;
     }
   }
 
@@ -324,10 +333,11 @@
 </table>
 
 {#if activeCellContent}
+  <!-- Conditional event binding -->
   <div 
     class="subwindow"
     style={`position: absolute; top: ${activeCellPosition.top}px; left: ${activeCellPosition.left}px; width: ${activeCellPosition.width}px; background: #fff; border: 1px solid #ccc; padding: 0.4rem 0.6rem; z-index: 20; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);`}
-    on:mouseleave={hideCellContent}
+    on:mouseleave={closeOnHoverOutside ? hideCellContent : null}
   >
     <div style="white-space: pre-wrap; word-wrap: break-word; font-size: inherit; font-family: inherit; text-align: left;">
       {activeCellContent}
