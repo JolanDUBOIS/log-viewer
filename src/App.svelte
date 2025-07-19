@@ -258,7 +258,7 @@
             </div>
           {:else}
             <!-- Placeholder button for other fields -->
-            <button disabled style="opacity: 0.5;">No Filter</button>
+            <button disabled style="opacity: 0.5;">Filter</button>
           {/if}
         </th>
       {/each}
@@ -275,8 +275,10 @@
       {#each filteredLogs as log}
         <tr>
           {#each Object.entries(log) as [key, value]}
-            <td style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;`}>
-              {value}
+            <td style={`width: ${COLUMN_WIDTHS[key] || 'auto'};`}>
+              <div style="overflow-x: auto; white-space: nowrap;">
+                {value}
+              </div>
             </td>
           {/each}
         </tr>
@@ -299,6 +301,20 @@
     white-space: nowrap; /* Ensure all fields are displayed as one-liners */
     overflow: hidden; /* Hide overflow content */
     text-overflow: ellipsis; /* Add ellipsis for overflow content */
+  }
+  td div {
+    overflow-x: auto; /* Enable horizontal scrolling for cell content */
+    white-space: nowrap; /* Prevent wrapping of text */
+  }
+  td div::-webkit-scrollbar {
+    height: 5px; /* Set scrollbar thickness */
+  }
+  td div::-webkit-scrollbar-thumb {
+    background: #ccc; /* Set scrollbar thumb color */
+    border-radius: 3px; /* Round scrollbar edges */
+  }
+  td div::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Set scrollbar track color */
   }
   th {
     background: #eee;
