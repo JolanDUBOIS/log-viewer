@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
 
   let logs = [];
   let filteredLogs = [];
@@ -25,6 +25,33 @@
     message: '300px',
   };
 
+  let activeCellContent = null; // Tracks the content of the clicked cell
+  let activeCellPosition = null; // Tracks the position of the sub-element
+
+  function showCellContent(event, content) {
+    const rect = event.target.getBoundingClientRect();
+    const tableRect = document.querySelector("table").getBoundingClientRect();
+    activeCellContent = content;
+    activeCellPosition = {
+      top: rect.bottom + window.scrollY,
+      left: tableRect.left + window.scrollX, // Align to the left of the table
+      width: tableRect.width, // Match the width of the table
+    };
+  }
+
+  function hideCellContent() {
+    activeCellContent = null;
+    activeCellPosition = null;
+  }
+
+  function handleClickOutside(event) {
+    const subWindow = document.querySelector(".subwindow");
+    const clickedCell = event.target.closest("td div");
+    if (subWindow && !subWindow.contains(event.target) && !clickedCell) {
+      hideCellContent();
+    }
+  }
+
   onMount(async () => {
     const res = await fetch('/log.json');
     const text = await res.text();
@@ -40,6 +67,12 @@
 
     // Calculate dropdown width based on the largest levelname
     dropdownWidth = `${Math.max(...levels.map(level => level.length)) * 1}rem`;
+
+    document.addEventListener("click", handleClickOutside);
+  });
+
+  onDestroy(() => {
+    document.removeEventListener("click", handleClickOutside);
   });
 
   function filterLogs() {
@@ -276,7 +309,10 @@
         <tr>
           {#each Object.entries(log) as [key, value]}
             <td style={`width: ${COLUMN_WIDTHS[key] || 'auto'};`}>
-              <div style="overflow-x: auto; white-space: nowrap;">
+              <div 
+                style="overflow-x: auto; white-space: nowrap; cursor: pointer;" 
+                on:click={(event) => showCellContent(event, value)}
+              >
                 {value}
               </div>
             </td>
@@ -286,6 +322,18 @@
     {/if}
   </tbody>
 </table>
+
+{#if activeCellContent}
+  <div 
+    class="subwindow"
+    style={`position: absolute; top: ${activeCellPosition.top}px; left: ${activeCellPosition.left}px; width: ${activeCellPosition.width}px; background: #fff; border: 1px solid #ccc; padding: 0.4rem 0.6rem; z-index: 20; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);`}
+    on:mouseleave={hideCellContent}
+  >
+    <div style="white-space: pre-wrap; word-wrap: break-word; font-size: inherit; font-family: inherit; text-align: left;">
+      {activeCellContent}
+    </div>
+  </div>
+{/if}
 
 <style>
   table {
