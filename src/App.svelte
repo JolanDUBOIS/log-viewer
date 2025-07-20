@@ -1,8 +1,11 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { showCellContent, handleClickOutside } from './utils/uiHelpers.js';
+  import { activeCellContent, activeCellPosition, headerFontSize, logs, filteredLogs } from './stores/logStore.js';
+  import { COLUMN_WIDTHS } from './constants.js';
+  import ActiveCellPopup from './components/ActiveCellPopup.svelte';
+  // import TableBody from './components/TableBody.svelte';
 
-  let logs = [];
-  let filteredLogs = [];
   let levels = [];
   let selectedLevels = new Set();
   let showFilter = {}; // Object to track visibility of dropdowns for each column
@@ -15,58 +18,21 @@
     message: { filterIn: '', filterOut: '' },
   };
 
-  const COLUMN_WIDTHS = {
-    asctime: '150px',
-    levelname: '100px',
-    name: '120px',
-    filename: '150px',
-    lineno: '80px',
-    funcName: '120px',
-    message: '1000px',
-  };
+  // function handleMouseLeave() {
+  //   hideCellContent($closeOnHoverOutside, activeCellContent, activeCellPosition);
+  // }
 
-  let activeCellContent = null; // Tracks the content of the clicked cell
-  let activeCellPosition = null; // Tracks the position of the sub-element
-  let closeOnHoverOutside = false; // Boolean to toggle hover-based closing
-
-  function showCellContent(event, content) {
-    if (activeCellContent === content) {
-      activeCellContent = null;
-      activeCellPosition = null;
-    } else {
-      const rect = event.target.getBoundingClientRect();
-      const tableRect = document.querySelector("table").getBoundingClientRect();
-      activeCellContent = content;
-      activeCellPosition = {
-        top: rect.bottom + window.scrollY,
-        left: Math.min(rect.left, tableRect.right - rect.width), // Align left unless it overflows
-        width: Math.min(rect.width, tableRect.width), // Ensure width fits within the table
-      };
-    }
-  }
-
-  function hideCellContent() {
-    if (!closeOnHoverOutside) return; // Only hide if hover-based closing is enabled
-    activeCellContent = null;
-    activeCellPosition = null;
-  }
-
-  function handleClickOutside(event) {
-    const subWindow = document.querySelector(".subwindow");
-    const clickedCell = event.target.closest("td div");
-    if (subWindow && !subWindow.contains(event.target) && !clickedCell) {
-      activeCellContent = null;
-      activeCellPosition = null;
-    }
+  function wrappedClickHandler(event) {
+    handleClickOutside(event, activeCellContent, activeCellPosition);
   }
 
   onMount(async () => {
     const res = await fetch('/log.json');
     const text = await res.text();
-    logs = text.split('\n').filter(line => line.trim()).map(line => JSON.parse(line));
-    levels = [...new Set(logs.map(log => log.levelname))];
+    logs.set(text.split('\n').filter(line => line.trim()).map(line => JSON.parse(line)));
+    levels = [...new Set($logs.map(log => log.levelname))];
     selectedLevels = new Set(levels); // Default: all values are checked
-    filteredLogs = logs;
+    filteredLogs.set($logs);
 
     // Initialize showFilter for all keys
     Object.keys(logs[0] || {}).forEach(key => {
@@ -76,44 +42,46 @@
     // Calculate dropdown width based on the largest levelname
     dropdownWidth = `${Math.max(...levels.map(level => level.length)) * 1}rem`;
 
-    document.addEventListener("click", handleClickOutside);
+    document.addEventListener("click", wrappedClickHandler);
   });
 
   onDestroy(() => {
-    document.removeEventListener("click", handleClickOutside);
+    document.removeEventListener("click", wrappedClickHandler);
   });
 
-  function filterLogs() {
-    filteredLogs = logs.filter(log => selectedLevels.has(log.levelname));
+  function applyLevelFilter() {
+    filteredLogs.set($logs.filter(log => selectedLevels.has(log.levelname)));
   }
 
   function toggleLevel(level) {
+    // Toggles the selection state of a log level and updates the filtered logs.
     if (selectedLevels.has(level)) {
       selectedLevels.delete(level);
     } else {
       selectedLevels.add(level);
     }
-    filterLogs();
+    applyLevelFilter();
   }
 
   function filterAsctime() {
     const { from, until } = asctimeFilter;
-    filteredLogs = logs.filter(log => {
+    filteredLogs.set($logs.filter(log => {
       const logTime = new Date(log.asctime);
 
       return (!from || logTime >= new Date(from)) && (!until || logTime <= new Date(until));
-    });
+    }));
   }
 
   function filterText(field) {
     const { filterIn, filterOut } = textFilters[field];
-    filteredLogs = logs.filter(log => {
+    filteredLogs.set($logs.filter(log => {
       const value = log[field] || '';
       return (!filterIn || value.includes(filterIn)) && (!filterOut || !value.includes(filterOut));
-    });
+    }));
   }
 
   function toggleDropdown(key, state) {
+    // Toggles the visibility of the filter dropdown for a specific column.
     showFilter[key] = state;
   }
 
@@ -141,13 +109,13 @@
 <table>
   <thead>
     <tr>
-      {#each Object.keys(filteredLogs[0] || logs[0] || {}) as key}
-        <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'};`}>{key}</th>
+      {#each Object.keys($filteredLogs[0] || logs[0] || {}) as key}
+        <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; font-size: ${headerFontSize};`}>{key}</th>
       {/each}
     </tr>
     <tr>
-      {#each Object.keys(filteredLogs[0] || logs[0] || {}) as key}
-        <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; position: relative;`}>
+      {#each Object.keys($filteredLogs[0] || logs[0] || {}) as key}
+        <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; position: relative; font-size: ${headerFontSize};`}>
           {#if key === 'levelname'}
             <!-- Filter button for levelname -->
             <div 
@@ -306,14 +274,14 @@
     </tr>
   </thead>
   <tbody>
-    {#if filteredLogs.length === 0}
+    {#if $filteredLogs.length === 0}
       <tr>
-        <td colspan="{Object.keys(filteredLogs[0] || logs[0] || {}).length}" style="text-align: center;">
+        <td colspan="{Object.keys($filteredLogs[0] || $logs[0] || {}).length}" style="text-align: center;">
           No rows match the filters.
         </td>
       </tr>
     {:else}
-      {#each filteredLogs as log}
+      {#each $filteredLogs as log}
         <tr>
           {#each Object.entries(log) as [key, value]}
             <td style={`width: ${COLUMN_WIDTHS[key] || 'auto'};`}>
@@ -321,7 +289,7 @@
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <div 
                 style="overflow-x: auto; white-space: nowrap; cursor: pointer;" 
-                on:click={(event) => showCellContent(event, value)}
+                on:click={(event) => showCellContent(event, value, activeCellContent, activeCellPosition)}
               >
                 {value}
               </div>
@@ -333,19 +301,7 @@
   </tbody>
 </table>
 
-{#if activeCellContent}
-  <!-- Conditional event binding -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div 
-    class="subwindow"
-    style={`position: absolute; top: ${activeCellPosition.top}px; left: ${activeCellPosition.left}px; max-width: calc(100vw - 40px); background: #fff; border: 1px solid #ccc; padding: 0.4rem 0.6rem; z-index: 20; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);`}
-    on:mouseleave={closeOnHoverOutside ? hideCellContent : null}
-  >
-    <div style="white-space: pre-wrap; word-wrap: break-word; font-size: inherit; font-family: inherit; text-align: left;">
-      {activeCellContent}
-    </div>
-  </div>
-{/if}
+<ActiveCellPopup />
 
 <style>
   :global(#app) {
