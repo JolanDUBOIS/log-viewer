@@ -4,7 +4,7 @@
   import { activeCellContent, activeCellPosition, headerFontSize, logs, filteredLogs } from './stores/logStore.js';
   import { COLUMN_WIDTHS } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
-  // import TableBody from './components/TableBody.svelte';
+  import TableCell from './components/TableCell.svelte';
 
   let levels = [];
   let selectedLevels = new Set();
@@ -284,16 +284,10 @@
       {#each $filteredLogs as log}
         <tr>
           {#each Object.entries(log) as [key, value]}
-            <td style={`width: ${COLUMN_WIDTHS[key] || 'auto'};`}>
-              <!-- svelte-ignore a11y_click_events_have_key_events -->
-              <!-- svelte-ignore a11y_no_static_element_interactions -->
-              <div 
-                style="overflow-x: auto; white-space: nowrap; cursor: pointer;" 
-                on:click={(event) => showCellContent(event, value, activeCellContent, activeCellPosition)}
-              >
-                {value}
-              </div>
-            </td>
+            <TableCell 
+              width={COLUMN_WIDTHS[key] || 'auto'} 
+              value={value}
+            ></TableCell>
           {/each}
         </tr>
       {/each}
@@ -325,24 +319,6 @@
     white-space: nowrap; /* Ensure all fields are displayed as one-liners */
     overflow: hidden; /* Hide overflow content */
     text-overflow: ellipsis; /* Add ellipsis for overflow content */
-  }
-
-  td div {
-    overflow-x: auto; /* Enable horizontal scrolling for cell content */
-    white-space: nowrap; /* Prevent wrapping of text */
-  }
-
-  td div::-webkit-scrollbar {
-    height: 5px; /* Set scrollbar thickness */
-  }
-
-  td div::-webkit-scrollbar-thumb {
-    background: #ccc; /* Set scrollbar thumb color */
-    border-radius: 3px; /* Round scrollbar edges */
-  }
-
-  td div::-webkit-scrollbar-track {
-    background: #f1f1f1; /* Set scrollbar track color */
   }
 
   th {
