@@ -1,6 +1,6 @@
 <script>
   import { showCellContent } from "../utils/uiHelpers";
-  import { activeCellContent, activeCellPosition } from '../stores/logStore.js';
+  import { activeCellPopup } from '../stores/logStore.js';
   export let width;
   export let value;
 </script>
@@ -10,7 +10,7 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class="table-cell"
-    on:click={(event) => showCellContent(event, value, activeCellContent, activeCellPosition)}
+    on:click={(event) => showCellContent(event, value, activeCellPopup)}
   >
     {value}
   </div>

@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { showCellContent, handleClickOutside } from './utils/uiHelpers.js';
-  import { activeCellContent, activeCellPosition, headerFontSize, logs, filteredLogs } from './stores/logStore.js';
+  import { handleClickOutside } from './utils/uiHelpers.js';
+  import { activeCellPopup, headerFontSize, logs, filteredLogs } from './stores/logStore.js';
   import { COLUMN_WIDTHS } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
@@ -23,7 +23,7 @@
   // }
 
   function wrappedClickHandler(event) {
-    handleClickOutside(event, activeCellContent, activeCellPosition);
+    handleClickOutside(event, activeCellPopup);
   }
 
   onMount(async () => {

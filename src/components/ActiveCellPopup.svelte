@@ -1,21 +1,21 @@
 <script>
-  import { activeCellContent, activeCellPosition, closeOnHoverOutside } from '../stores/logStore.js';
+  import { activeCellPopup, closeOnHoverOutside } from '../stores/logStore.js';
   import { hideCellContent } from '../utils/uiHelpers.js';
 
   function handleMouseLeave() {
-    hideCellContent(closeOnHoverOutside, activeCellContent, activeCellPosition);
+    hideCellContent(closeOnHoverOutside, activeCellPopup);
   }
 </script>
 
-{#if $activeCellContent}
+{#if $activeCellPopup}
   <div 
     class="subwindow"
     aria-hidden="true"
-    style={`top: ${$activeCellPosition.top}px; left: ${$activeCellPosition.left}px;`}
+    style={`top: ${$activeCellPopup.position.top}px; left: ${$activeCellPopup.position.left}px;`}
     on:mouseleave={handleMouseLeave}
   >
     <!-- <div style="white-space: pre-wrap; word-wrap: break-word; font-size: inherit; font-family: inherit; text-align: left;"> -->
-      {$activeCellContent}
+      {$activeCellPopup.content}
     <!-- </div> -->
   </div>
 {/if}
