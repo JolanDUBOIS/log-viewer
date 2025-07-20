@@ -7,3 +7,5 @@ export const COLUMN_WIDTHS = {
   funcName: '120px',
   message: '1000px',
 };
+export const headerFontSize = '1rem'; // Font size for the top row
+export const cellFontSize = '0.9rem'; // Font size for the normal cells below

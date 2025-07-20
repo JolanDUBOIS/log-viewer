@@ -14,9 +14,7 @@
     style={`top: ${$activeCellPopup.position.top}px; left: ${$activeCellPopup.position.left}px;`}
     on:mouseleave={handleMouseLeave}
   >
-    <!-- <div style="white-space: pre-wrap; word-wrap: break-word; font-size: inherit; font-family: inherit; text-align: left;"> -->
       {$activeCellPopup.content}
-    <!-- </div> -->
   </div>
 {/if}
 

@@ -1,8 +1,8 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { handleClickOutside } from './utils/uiHelpers.js';
-  import { activeCellPopup, headerFontSize, logs, filteredLogs } from './stores/logStore.js';
-  import { COLUMN_WIDTHS } from './constants.js';
+  import { activeCellPopup, logs, filteredLogs } from './stores/logStore.js';
+  import { COLUMN_WIDTHS, headerFontSize } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
 
