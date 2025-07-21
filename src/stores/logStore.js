@@ -7,10 +7,16 @@ import { writable } from 'svelte/store';
  */
 export const activeCellPopup = writable(null);
 
-
 export const closeOnHoverOutside = writable(false); // Whether to close the popup on hover outside
 
-export const headerFontSize = writable('1rem'); // Font size for the top row
-export const cellFontSize = writable('0.9rem'); // Font size for the normal cells below
 export const logs = writable([]); // Array of all logs
 export const filteredLogs = writable([]); // Array of filtered logs
+
+export const selectedLevels = writable(new Set()); // Set of selected log levels
+export const asctimeFilter = writable({ from: '', until: '' }); // Filter for log
+export const textFilters = writable({
+    name: { filterIn: '', filterOut: '' },
+    filename: { filterIn: '', filterOut: '' },
+    funcName: { filterIn: '', filterOut: '' },
+    message: { filterIn: '', filterOut: '' },
+  }); // Text filters for different fields

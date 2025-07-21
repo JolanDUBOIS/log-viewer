@@ -1,26 +1,14 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { handleClickOutside } from './utils/uiHelpers.js';
-  import { activeCellPopup, logs, filteredLogs } from './stores/logStore.js';
+  import { activeCellPopup, logs, filteredLogs, selectedLevels, asctimeFilter, textFilters } from './stores/logStore.js';
   import { COLUMN_WIDTHS, headerFontSize } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
 
   let levels = [];
-  let selectedLevels = new Set();
   let showFilter = {}; // Object to track visibility of dropdowns for each column
   let dropdownWidth = 'auto';
-  let asctimeFilter = { from: '', until: '' };
-  let textFilters = {
-    name: { filterIn: '', filterOut: '' },
-    filename: { filterIn: '', filterOut: '' },
-    funcName: { filterIn: '', filterOut: '' },
-    message: { filterIn: '', filterOut: '' },
-  };
-
-  // function handleMouseLeave() {
-  //   hideCellContent($closeOnHoverOutside, activeCellContent, activeCellPosition);
-  // }
 
   function wrappedClickHandler(event) {
     handleClickOutside(event, activeCellPopup);
@@ -31,7 +19,7 @@
     const text = await res.text();
     logs.set(text.split('\n').filter(line => line.trim()).map(line => JSON.parse(line)));
     levels = [...new Set($logs.map(log => log.levelname))];
-    selectedLevels = new Set(levels); // Default: all values are checked
+    selectedLevels.set(new Set(levels)); // Default: all values are checked
     filteredLogs.set($logs);
 
     // Initialize showFilter for all keys
@@ -50,21 +38,21 @@
   });
 
   function applyLevelFilter() {
-    filteredLogs.set($logs.filter(log => selectedLevels.has(log.levelname)));
+    filteredLogs.set($logs.filter(log => $selectedLevels.has(log.levelname)));
   }
 
   function toggleLevel(level) {
     // Toggles the selection state of a log level and updates the filtered logs.
-    if (selectedLevels.has(level)) {
-      selectedLevels.delete(level);
+    if ($selectedLevels.has(level)) {
+      $selectedLevels.delete(level);
     } else {
-      selectedLevels.add(level);
+      $selectedLevels.add(level);
     }
     applyLevelFilter();
   }
 
   function filterAsctime() {
-    const { from, until } = asctimeFilter;
+    const { from, until } = $asctimeFilter;
     filteredLogs.set($logs.filter(log => {
       const logTime = new Date(log.asctime);
 
@@ -73,7 +61,7 @@
   }
 
   function filterText(field) {
-    const { filterIn, filterOut } = textFilters[field];
+    const { filterIn, filterOut } = $textFilters[field];
     filteredLogs.set($logs.filter(log => {
       const value = log[field] || '';
       return (!filterIn || value.includes(filterIn)) && (!filterOut || !value.includes(filterOut));
@@ -86,12 +74,12 @@
   }
 
   function clearAsctimeFilter() {
-    asctimeFilter = { from: '', until: '' };
+    asctimeFilter.set({ from: '', until: '' });
     filterAsctime();
   }
 
   function clearTextFilter(field) {
-    textFilters[field] = { filterIn: '', filterOut: '' };
+    $textFilters[field] = { filterIn: '', filterOut: '' };
     filterText(field);
   }
 
@@ -137,7 +125,7 @@
                       <label>
                         <input 
                           type="checkbox" 
-                          checked={selectedLevels.has(level)} 
+                          checked={$selectedLevels.has(level)} 
                           on:change={() => toggleLevel(level)} 
                         />
                         {level}
@@ -170,7 +158,7 @@
                         <input 
                           id="asctime-from"
                           type="text" 
-                          bind:value={asctimeFilter.from} 
+                          bind:value={$asctimeFilter.from} 
                           on:input={filterAsctime} 
                           placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
                           style="width: calc(100% - 2.5rem); padding-right: 2rem;"
@@ -189,7 +177,7 @@
                         <input 
                           id="asctime-until"
                           type="text" 
-                          bind:value={asctimeFilter.until} 
+                          bind:value={$asctimeFilter.until} 
                           on:input={filterAsctime} 
                           placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
                           style="width: calc(100% - 2.5rem); padding-right: 2rem;"
@@ -229,7 +217,7 @@
                         <input 
                           id="filter-in-{key}"
                           type="text" 
-                          bind:value={textFilters[key].filterIn} 
+                          bind:value={$textFilters[key].filterIn} 
                           on:input={() => filterText(key)} 
                           placeholder="Include text"
                           style="width: calc(100% - 2.5rem); padding-right: 2rem;"
@@ -248,7 +236,7 @@
                         <input 
                           id="filter-out-{key}"
                           type="text" 
-                          bind:value={textFilters[key].filterOut} 
+                          bind:value={$textFilters[key].filterOut} 
                           on:input={() => filterText(key)} 
                           placeholder="Exclude text"
                           style="width: calc(100% - 2.5rem); padding-right: 2rem;"
