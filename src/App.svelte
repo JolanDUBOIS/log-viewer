@@ -5,6 +5,7 @@
   import { COLUMN_WIDTHS, headerFontSize } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
+  import LevelnameButton from './components/LevelnameButton.svelte';
 
   let levels = [];
   let showFilter = {}; // Object to track visibility of dropdowns for each column
@@ -23,7 +24,7 @@
     filteredLogs.set($logs);
 
     // Initialize showFilter for all keys
-    Object.keys(logs[0] || {}).forEach(key => {
+    Object.keys($logs[0] || {}).forEach(key => {
       showFilter[key] = false;
     });
 
@@ -83,6 +84,7 @@
     filterText(field);
   }
 
+  // Calculates the position of the dropdown relative to the clicked element.
   function getDropdownPosition(event) {
     const rect = event.target.getBoundingClientRect();
     return {
@@ -97,44 +99,23 @@
 <table>
   <thead>
     <tr>
-      {#each Object.keys($filteredLogs[0] || logs[0] || {}) as key}
+      {#each Object.keys($logs[0] || {}) as key}
         <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; font-size: ${headerFontSize};`}>{key}</th>
       {/each}
     </tr>
     <tr>
-      {#each Object.keys($filteredLogs[0] || logs[0] || {}) as key}
+      {#each Object.keys($logs[0] || {}) as key}
         <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; position: relative; font-size: ${headerFontSize};`}>
           {#if key === 'levelname'}
             <!-- Filter button for levelname -->
-            <div 
-              role="button" 
-              tabindex="0" 
-              style="position: relative;" 
-              on:mouseenter={(event) => {
-                toggleDropdown(key, true);
-                const position = getDropdownPosition(event);
-                showFilter[key] = { visible: true, position };
-              }} 
-              on:mouseleave={() => toggleDropdown(key, false)}
-            >
-              <button>Filter</button>
-              {#if showFilter[key]?.visible}
-                <div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${showFilter[key].position.top}px; left: ${showFilter[key].position.left}px; width: ${dropdownWidth}; z-index: 10;`}>
-                  <div style="display: flex; flex-direction: column;">
-                    {#each levels as level}
-                      <label>
-                        <input 
-                          type="checkbox" 
-                          checked={$selectedLevels.has(level)} 
-                          on:change={() => toggleLevel(level)} 
-                        />
-                        {level}
-                      </label>
-                    {/each}
-                  </div>
-                </div>
-              {/if}
-            </div>
+            <LevelnameButton 
+              key={key} 
+              levels={levels} 
+              showFilter={showFilter} 
+              dropdownWidth={dropdownWidth} 
+              toggleDropdown={toggleDropdown} 
+              getDropdownPosition={getDropdownPosition}
+            />
           {:else if key === 'asctime'}
             <!-- Filter button for asctime -->
             <div 
