@@ -1,9 +1,15 @@
 <script>
 	import { logs, filteredLogs, asctimeFilter } from '../stores/logStore.js';
+  import ClearTextFieldButton from './ClearTextFieldButton.svelte';
   export let key;
 	export let showFilter;
   export let toggleDropdown;
 	export let getDropdownPosition;
+
+  const fields = [
+    { label: 'From', id: 'asctime-from', valueKey: 'from' },
+    { label: 'Until', id: 'asctime-until', valueKey: 'until' }
+  ]
 
   function filterAsctime() {
     const { from, until } = $asctimeFilter;
@@ -31,49 +37,29 @@
   }} 
   on:mouseleave={() => toggleDropdown(key, false)}
 >
-<button>Filter</button>
-{#if showFilter[key]?.visible}
-  <div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${showFilter[key].position.top}px; left: ${showFilter[key].position.left}px; min-width: 200px; z-index: 10;`}>
-    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-      <div>
-        <label for="asctime-from" style="display: block; margin-bottom: 0.3rem;">From</label>
-        <div style="position: relative;">
-          <input 
-            id="asctime-from"
-            type="text" 
-            bind:value={$asctimeFilter.from} 
-            on:input={filterAsctime} 
-            placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
-            style="width: calc(100% - 2.5rem); padding-right: 2rem;"
-          />
-          <button 
-            style="position: absolute; top: 50%; right: 0.3rem; transform: translateY(-50%); font-size: 0.8rem; padding: 0; border: none; background: transparent; cursor: pointer;" 
-            on:click={clearAsctimeFilter}
-          >
-            ✖
-          </button>
-        </div>
-      </div>
-      <div>
-        <label for="asctime-until" style="display: block; margin-bottom: 0.3rem;">Until</label>
-        <div style="position: relative;">
-          <input 
-            id="asctime-until"
-            type="text" 
-            bind:value={$asctimeFilter.until} 
-            on:input={filterAsctime} 
-            placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
-            style="width: calc(100% - 2.5rem); padding-right: 2rem;"
-          />
-          <button 
-            style="position: absolute; top: 50%; right: 0.3rem; transform: translateY(-50%); font-size: 0.8rem; padding: 0; border: none; background: transparent; cursor: pointer;" 
-            on:click={clearAsctimeFilter}
-          >
-            ✖
-          </button>
-        </div>
+  <button>Filter</button>
+  {#if showFilter[key]?.visible}
+    <div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${showFilter[key].position.top}px; left: ${showFilter[key].position.left}px; min-width: 200px; z-index: 10;`}>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        {#each fields as field}
+          <div>
+            <label for={field.id} style="display: block; margin-bottom: 0.3rem;">{field.label}</label>
+            <div style="position: relative;">
+              <input 
+                id={field.id}
+                type="text" 
+                bind:value={$asctimeFilter[field.valueKey]} 
+                on:input={filterAsctime} 
+                placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
+                style="width: calc(100% - 2.5rem); padding-right: 2rem;"
+              />
+              <ClearTextFieldButton 
+                clearFunc={clearAsctimeFilter} 
+              />
+            </div>
+          </div>
+        {/each}
       </div>
     </div>
-  </div>
-{/if}
+  {/if}
 </div>
