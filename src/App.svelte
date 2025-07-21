@@ -5,7 +5,7 @@
   import { COLUMN_WIDTHS, headerFontSize } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
-  import LevelnameButton from './components/LevelnameButton.svelte';
+  import LevelnameFilterButton from './components/LevelnameFilterButton.svelte';
 
   let levels = [];
   let showFilter = {}; // Object to track visibility of dropdowns for each column
@@ -108,7 +108,7 @@
         <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; position: relative; font-size: ${headerFontSize};`}>
           {#if key === 'levelname'}
             <!-- Filter button for levelname -->
-            <LevelnameButton 
+            <LevelnameFilterButton 
               key={key} 
               levels={levels} 
               showFilter={showFilter} 
