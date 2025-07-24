@@ -31,7 +31,7 @@
     });
 
     // Calculate dropdown width based on the largest levelname
-    dropdownWidth = `${Math.max(...levels.map(level => level.length)) * 1}rem`;
+    dropdownWidth = `${Math.max(...levels.map(level => level.length))}rem`;
 
     document.addEventListener("click", wrappedClickHandler);
   });
