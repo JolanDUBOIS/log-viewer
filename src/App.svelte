@@ -60,32 +60,27 @@
 
 <table>
   <thead>
-    <tr>
-      {#each schema as key}
-        <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; font-size: ${headerFontSize};`}>{key}</th>
-      {/each}
-    </tr>
-    <tr>
-      {#each schema as key}
-        <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; position: relative; font-size: ${headerFontSize};`}>
-          {#if key === 'levelname'}
+    <tr style="position: sticky; top: 0; background: #fff; z-index: 1;">
+      {#each schema as filterKey}
+        <th style={`width: ${COLUMN_WIDTHS[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
+          {#if filterKey === 'levelname'}
             <!-- Filter button for levelname -->
-            <FilterDropdown filterKey={key}>
+            <FilterDropdown filterKey={filterKey}>
               <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
             </FilterDropdown>
-          {:else if key === 'asctime'}
+          {:else if filterKey === 'asctime'}
             <!-- Filter button for asctime -->
-            <FilterDropdown filterKey={key}>
+            <FilterDropdown filterKey={filterKey}>
               <AsctimeFilterButton slot="dropdown-content"/>
             </FilterDropdown>
-          {:else if ['filename', 'funcName', 'message', 'name'].includes(key)}
+          {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
             <!-- Filter button for filename, funcName, and message -->
-            <FilterDropdown filterKey={key}>
-              <TextFilterButton slot="dropdown-content" filterKey={key}/>
+            <FilterDropdown filterKey={filterKey}>
+              <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
             </FilterDropdown>
           {:else}
             <!-- Placeholder button for other fields -->
-            <button disabled style="opacity: 0.5;">Filter</button>
+            <button disabled style="opacity: 0.5;">{filterKey}</button>
           {/if}
         </th>
       {/each}
@@ -144,6 +139,7 @@
   th {
     background: #eee;
     position: relative; /* Ensure filter dropdown is positioned correctly */
+    border: 2px solid #ccc; /* Thicker border for table head cells */
   }
 
   tbody tr:nth-child(even) {

@@ -1,10 +1,10 @@
 export const COLUMN_WIDTHS = {
   asctime: '150px',
-  levelname: '80px',
+  levelname: '100px',
   name: '120px',
   filename: '150px',
   lineno: '80px',
-  funcName: '90px',
+  funcName: '100px',
   message: '1000px',
 };
 export const headerFontSize = '1rem'; // Font size for the top row

@@ -32,8 +32,9 @@
   <button 
     on:mouseenter={onButtonMouseEnter}
     on:mouseleave={() => setHover('buttonHovered', false)}
+    style="width: 100%; display: flex; align-items: center; justify-content: center;"
   >
-    Filter
+    {filterKey}
   </button>
   {#if isDropdownVisible(filterKey, $filterDropdownState)}
     <div
