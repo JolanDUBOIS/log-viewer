@@ -16,6 +16,16 @@
       };
     });
   }
+
+  function updateTextFilter(valueKey, value) {
+    textFilters.update(filters => ({
+      ...filters,
+      [filterKey]: {
+        ...filters[filterKey],
+        [valueKey]: value
+      }
+    }));
+  }
 </script>
 
 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
@@ -26,13 +36,12 @@
         <input 
           id={field.id}
           type="text" 
-          bind:value={$textFilters[filterKey][field.valueKey]}
+          value={$textFilters[filterKey][field.valueKey]}
           placeholder={field.placeholder}
           style="width: calc(100% - 2.5rem); padding-right: 2rem;"
+          on:input={(e) => updateTextFilter(field.valueKey, e.currentTarget.value)}
         />
-        <ClearTextFieldButton 
-          clearFunc={() => clearTextFilter(filterKey)} 
-        />
+        <ClearTextFieldButton clearFunc={() => clearTextFilter(filterKey)} />
       </div>
     </div>
   {/each}

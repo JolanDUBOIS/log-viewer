@@ -3,14 +3,14 @@
   import { handleClickOutside } from './utils/uiHelpers.js';
   import { applyAllFilters } from './utils/filterEngine.js';
   import { initializeLogs } from './utils/setupApp.js';
-  import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter, showFilter, filterDropdownState } from './stores/logStore.js';
-  import { COLUMN_WIDTHS, headerFontSize } from './constants.js';
+  import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter, filterDropdownState } from './stores/logStore.js';
+  import { COLUMN_WIDTHS, headerFontSize, headerHeight } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
   import LevelnameFilterButton from './components/LevelnameFilterButton.svelte';
   import AsctimeFilterButton from './components/AsctimeFilterButton.svelte';
   import TextFilterButton from './components/TextFilterButton.svelte';
-  import Footer from './components/Footer.svelte';
+  import Header from './components/Header.svelte';
   import FilterDropdown from './components/FilterDropdown.svelte';
 
   // This block runs each time any update occurs, that could be an issue if the app grows larger...
@@ -36,12 +36,37 @@
     schema = value;
   }
 
+  let resizingColumn = null;
+  let startX = 0;
+  let startWidth = 0;
+
+  function handleMouseDown(event, filterKey) {
+    resizingColumn = filterKey;
+    startX = event.clientX;
+    startWidth = parseInt(COLUMN_WIDTHS[filterKey], 10) || 0; // Ensure startWidth is a number
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }
+
+  function handleMouseMove(event) {
+    if (resizingColumn) {
+      const deltaX = event.clientX - startX;
+      const newWidth = Math.max(50, parseInt(String(startWidth), 10) + deltaX) + 'px'; // Convert startWidth to string
+      COLUMN_WIDTHS[resizingColumn] = newWidth;
+    }
+  }
+
+  function handleMouseUp() {
+    resizingColumn = null;
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }
+
   onMount(async () => {
     await initializeLogs({
       logs,
       filteredLogs,
       selectedLevels,
-      showFilter,
       filterDropdownState,
       setLevels: l => levels = l,
       setDropdownWidth: dw => dropdownWidth = dw,
@@ -54,13 +79,16 @@
   onDestroy(() => {
     document.removeEventListener("click", wrappedClickHandler);
   });
+
+  const numericHeight = parseInt(headerHeight, 10);
+  const marginTop = numericHeight + 40 + 'px';
 </script>
 
-<h1>Log Viewer</h1>
+<Header />
 
-<table>
+<table style={`margin-top: ${marginTop};`}>
   <thead>
-    <tr style="position: sticky; top: 0; background: #fff; z-index: 1;">
+    <tr style={`position: sticky; top: ${headerHeight}; background: #fff; z-index: 1;`}>
       {#each schema as filterKey}
         <th style={`width: ${COLUMN_WIDTHS[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
           {#if filterKey === 'levelname'}
@@ -82,6 +110,11 @@
             <!-- Placeholder button for other fields -->
             <button disabled style="opacity: 0.5;">{filterKey}</button>
           {/if}
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
+          <div 
+            style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
+            on:mousedown={(event) => handleMouseDown(event, filterKey)}
+          ></div>
         </th>
       {/each}
     </tr>
@@ -110,9 +143,12 @@
 
 <ActiveCellPopup />
 
-<Footer />
-
 <style>
+  :global(html), :global(body) {
+    margin: 0;
+    padding: 0;
+  }
+
   :global(#app) {
     margin-left: 20px;
     margin-right: 20px;
@@ -140,6 +176,10 @@
     background: #eee;
     position: relative; /* Ensure filter dropdown is positioned correctly */
     border: 2px solid #ccc; /* Thicker border for table head cells */
+  }
+
+  th div {
+    background: transparent; /* Ensure the resize handle is transparent */
   }
 
   tbody tr:nth-child(even) {
