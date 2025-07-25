@@ -24,3 +24,11 @@ export function handleClickOutside(event, activeCellPopup) {
       activeCellPopup.set(null);
     }
   }
+
+export function getDropdownPosition(event) {
+  const rect = event.target.getBoundingClientRect();
+  return {
+    top: rect.bottom,
+    left: rect.left,
+  };
+}

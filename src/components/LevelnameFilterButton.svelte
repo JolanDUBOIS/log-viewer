@@ -1,15 +1,9 @@
 <script>
-	import { selectedLevels } from '../stores/logStore.js';
+	import { selectedLevels, toggleDropdown, showFilter } from '../stores/logStore.js';
+  import { getDropdownPosition } from '../utils/uiHelpers.js';
 	export let key;
 	export let levels;
-	export let showFilter;
 	export let dropdownWidth;
-  export let toggleDropdown;
-	export let getDropdownPosition;
-
-  // function applyLevelFilter() {
-  //   filteredLogs.set($logs.filter(log => $selectedLevels.has(log.levelname)));
-  // }
 
 	function toggleLevel(level) {
 		selectedLevels.update(levels => {
@@ -31,13 +25,13 @@
 	on:mouseenter={(event) => {
 		toggleDropdown(key, true);
 		const position = getDropdownPosition(event);
-		showFilter[key] = { visible: true, position };
+    showFilter.update(current => ({...current, [key]: { visible: true, position }}))
 	}} 
 	on:mouseleave={() => toggleDropdown(key, false)}
 >
 <button>Filter</button>
-{#if showFilter[key]?.visible}
-	<div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${showFilter[key].position.top}px; left: ${showFilter[key].position.left}px; width: ${dropdownWidth}; z-index: 10;`}>
+{#if $showFilter[key]?.visible}
+	<div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${$showFilter[key].position.top}px; left: ${$showFilter[key].position.left}px; width: ${dropdownWidth}; z-index: 10;`}>
 		<div style="display: flex; flex-direction: column;">
 			{#each levels as level}
 				<label>

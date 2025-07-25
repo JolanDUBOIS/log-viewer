@@ -3,13 +3,14 @@
   import { handleClickOutside } from './utils/uiHelpers.js';
   import { applyAllFilters } from './utils/filterEngine.js';
   import { initializeLogs } from './utils/setupApp.js';
-  import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter } from './stores/logStore.js';
+  import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter, showFilter } from './stores/logStore.js';
   import { COLUMN_WIDTHS, headerFontSize } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
   import LevelnameFilterButton from './components/LevelnameFilterButton.svelte';
   import AsctimeFilterButton from './components/AsctimeFilterButton.svelte';
   import TextFilterButton from './components/TextFilterButton.svelte';
+  import Footer from './components/Footer.svelte';
 
   // This block runs each time any update occurs, that could be an issue if the app grows larger...
   $: {
@@ -23,7 +24,6 @@
   }
 
   let levels = [];
-  let showFilter = {}; // Object to track visibility of dropdowns for each column
   let dropdownWidth = 'auto';
   let schema = [];
 
@@ -40,8 +40,8 @@
       logs,
       filteredLogs,
       selectedLevels,
+      showFilter,
       setLevels: l => levels = l,
-      setShowFilter: sf => showFilter = sf,
       setDropdownWidth: dw => dropdownWidth = dw,
       setSchema
     });
@@ -52,20 +52,6 @@
   onDestroy(() => {
     document.removeEventListener("click", wrappedClickHandler);
   });
-
-  function toggleDropdown(key, state) {
-    // Toggles the visibility of the filter dropdown for a specific column.
-    showFilter = { ...showFilter, [key]: state };
-  }
-
-  // Calculates the position of the dropdown relative to the clicked element.
-  function getDropdownPosition(event) {
-    const rect = event.target.getBoundingClientRect();
-    return {
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    };
-  }
 </script>
 
 <h1>Log Viewer</h1>
@@ -85,26 +71,17 @@
             <LevelnameFilterButton 
               key={key} 
               levels={levels} 
-              showFilter={showFilter} 
               dropdownWidth={dropdownWidth} 
-              toggleDropdown={toggleDropdown} 
-              getDropdownPosition={getDropdownPosition}
             />
           {:else if key === 'asctime'}
             <!-- Filter button for asctime -->
             <AsctimeFilterButton 
               key={key} 
-              showFilter={showFilter} 
-              toggleDropdown={toggleDropdown} 
-              getDropdownPosition={getDropdownPosition}
             />
           {:else if ['filename', 'funcName', 'message', 'name'].includes(key)}
             <!-- Filter button for filename, funcName, and message -->
             <TextFilterButton 
               key={key} 
-              showFilter={showFilter} 
-              toggleDropdown={toggleDropdown} 
-              getDropdownPosition={getDropdownPosition}
             />
           {:else}
             <!-- Placeholder button for other fields -->
@@ -137,6 +114,8 @@
 </table>
 
 <ActiveCellPopup />
+
+<Footer />
 
 <style>
   :global(#app) {

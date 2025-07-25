@@ -20,3 +20,12 @@ export const textFilters = writable({
     funcName: { filterIn: '', filterOut: '' },
     message: { filterIn: '', filterOut: '' },
   }); // Text filters for different fields
+
+export const showFilter = writable({});
+
+export function toggleDropdown(key, state) {
+  showFilter.update(current => ({
+    ...current,
+    [key]: state
+  }));
+}

@@ -1,28 +1,16 @@
 <script>
-	import { asctimeFilter } from '../stores/logStore.js';
+	import { asctimeFilter, toggleDropdown, showFilter } from '../stores/logStore.js';
+  import { getDropdownPosition } from '../utils/uiHelpers.js';
   import ClearTextFieldButton from './ClearTextFieldButton.svelte';
   export let key;
-	export let showFilter;
-  export let toggleDropdown;
-	export let getDropdownPosition;
 
   const fields = [
     { label: 'From', id: 'asctime-from', valueKey: 'from' },
     { label: 'Until', id: 'asctime-until', valueKey: 'until' }
   ]
 
-  // function filterAsctime() {
-  //   const { from, until } = $asctimeFilter;
-  //   filteredLogs.set($logs.filter(log => {
-  //     const logTime = new Date(log.asctime);
-
-  //     return (!from || logTime >= new Date(from)) && (!until || logTime <= new Date(until));
-  //   }));
-  // }
-
   function clearAsctimeFilter() {
     asctimeFilter.set({ from: '', until: '' });
-    // filterAsctime();
   }
 </script>
 
@@ -33,13 +21,13 @@
   on:mouseenter={(event) => {
     toggleDropdown(key, true);
     const position = getDropdownPosition(event);
-    showFilter[key] = { visible: true, position };
+    showFilter.update(current => ({...current, [key]: { visible: true, position }}))
   }} 
   on:mouseleave={() => toggleDropdown(key, false)}
 >
   <button>Filter</button>
-  {#if showFilter[key]?.visible}
-    <div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${showFilter[key].position.top}px; left: ${showFilter[key].position.left}px; min-width: 200px; z-index: 10;`}>
+  {#if $showFilter[key]?.visible}
+    <div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${$showFilter[key].position.top}px; left: ${$showFilter[key].position.left}px; min-width: 200px; z-index: 10;`}>
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
         {#each fields as field}
           <div>

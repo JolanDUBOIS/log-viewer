@@ -2,8 +2,8 @@ export async function initializeLogs({
   logs,
   filteredLogs,
   selectedLevels,
+  showFilter,
   setLevels,
-  setShowFilter,
   setDropdownWidth,
   setSchema // <-- NEW PARAM
 }) {
@@ -26,8 +26,8 @@ export async function initializeLogs({
   selectedLevels.set(new Set(levels));
   setLevels(levels);
 
-  // Use schema instead of Object.keys again
-  setShowFilter(Object.fromEntries(schema.map(k => [k, false])));
+  // Initialize showFilter for each schema field
+  showFilter.set(Object.fromEntries(schema.map(k => [k, { visible: false, position: { top: 0, left: 0 } }])));
 
   // Dropdown width based on longest level name
   setDropdownWidth(`${Math.max(...levels.map(level => level.length))}rem`);
