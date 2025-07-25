@@ -7,6 +7,10 @@
     { label: 'Until', id: 'asctime-until', valueKey: 'until' }
   ]
 
+  function updateFilter(key, value) {
+    asctimeFilter.update(current => ({ ...current, [key]: value }));
+  }
+
   function clearAsctimeFilter() {
     asctimeFilter.set({ from: '', until: '' });
   }
@@ -20,13 +24,12 @@
         <input 
           id={field.id}
           type="text" 
-          bind:value={$asctimeFilter[field.valueKey]}
+					value={$asctimeFilter[field.valueKey]}
+					on:input={(e) => updateFilter(field.valueKey, e.currentTarget.value)}
           placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
           style="width: calc(100% - 2.5rem); padding-right: 2rem;"
         />
-        <ClearTextFieldButton 
-          clearFunc={clearAsctimeFilter} 
-        />
+        <ClearTextFieldButton clearFunc={clearAsctimeFilter} />
       </div>
     </div>
   {/each}

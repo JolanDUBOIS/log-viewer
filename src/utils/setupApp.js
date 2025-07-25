@@ -2,7 +2,6 @@ export async function initializeLogs({
   logs,
   filteredLogs,
   selectedLevels,
-  showFilter,
   filterDropdownState,
   setLevels,
   setDropdownWidth,
@@ -26,9 +25,6 @@ export async function initializeLogs({
   const levels = [...new Set(parsedLogs.map(log => log.levelname))];
   selectedLevels.set(new Set(levels));
   setLevels(levels);
-
-  // Initialize showFilter for each schema field
-  showFilter.set(Object.fromEntries(schema.map(k => [k, { visible: false, position: { top: 0, left: 0 } }])));
 
   // Initialize filterDropdownState for each level
   filterDropdownState.set(Object.fromEntries(schema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
