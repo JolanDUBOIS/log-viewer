@@ -36,6 +36,32 @@
     schema = value;
   }
 
+  let resizingColumn = null;
+  let startX = 0;
+  let startWidth = 0;
+
+  function handleMouseDown(event, filterKey) {
+    resizingColumn = filterKey;
+    startX = event.clientX;
+    startWidth = parseInt(COLUMN_WIDTHS[filterKey], 10) || 0; // Ensure startWidth is a number
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }
+
+  function handleMouseMove(event) {
+    if (resizingColumn) {
+      const deltaX = event.clientX - startX;
+      const newWidth = Math.max(50, parseInt(String(startWidth), 10) + deltaX) + 'px'; // Convert startWidth to string
+      COLUMN_WIDTHS[resizingColumn] = newWidth;
+    }
+  }
+
+  function handleMouseUp() {
+    resizingColumn = null;
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }
+
   onMount(async () => {
     await initializeLogs({
       logs,
@@ -84,6 +110,11 @@
             <!-- Placeholder button for other fields -->
             <button disabled style="opacity: 0.5;">{filterKey}</button>
           {/if}
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
+          <div 
+            style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
+            on:mousedown={(event) => handleMouseDown(event, filterKey)}
+          ></div>
         </th>
       {/each}
     </tr>
@@ -145,6 +176,10 @@
     background: #eee;
     position: relative; /* Ensure filter dropdown is positioned correctly */
     border: 2px solid #ccc; /* Thicker border for table head cells */
+  }
+
+  th div {
+    background: transparent; /* Ensure the resize handle is transparent */
   }
 
   tbody tr:nth-child(even) {
