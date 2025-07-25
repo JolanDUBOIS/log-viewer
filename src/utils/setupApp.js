@@ -3,6 +3,7 @@ export async function initializeLogs({
   filteredLogs,
   selectedLevels,
   showFilter,
+  filterDropdownState,
   setLevels,
   setDropdownWidth,
   setSchema // <-- NEW PARAM
@@ -28,6 +29,9 @@ export async function initializeLogs({
 
   // Initialize showFilter for each schema field
   showFilter.set(Object.fromEntries(schema.map(k => [k, { visible: false, position: { top: 0, left: 0 } }])));
+
+  // Initialize filterDropdownState for each level
+  filterDropdownState.set(Object.fromEntries(schema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
 
   // Dropdown width based on longest level name
   setDropdownWidth(`${Math.max(...levels.map(level => level.length))}rem`);

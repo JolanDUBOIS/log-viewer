@@ -3,7 +3,7 @@
   import { handleClickOutside } from './utils/uiHelpers.js';
   import { applyAllFilters } from './utils/filterEngine.js';
   import { initializeLogs } from './utils/setupApp.js';
-  import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter, showFilter } from './stores/logStore.js';
+  import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter, showFilter, filterDropdownState } from './stores/logStore.js';
   import { COLUMN_WIDTHS, headerFontSize } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
@@ -11,6 +11,7 @@
   import AsctimeFilterButton from './components/AsctimeFilterButton.svelte';
   import TextFilterButton from './components/TextFilterButton.svelte';
   import Footer from './components/Footer.svelte';
+  import FilterDropdown from './components/FilterDropdown.svelte';
 
   // This block runs each time any update occurs, that could be an issue if the app grows larger...
   $: {
@@ -41,6 +42,7 @@
       filteredLogs,
       selectedLevels,
       showFilter,
+      filterDropdownState,
       setLevels: l => levels = l,
       setDropdownWidth: dw => dropdownWidth = dw,
       setSchema
@@ -68,21 +70,19 @@
         <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; position: relative; font-size: ${headerFontSize};`}>
           {#if key === 'levelname'}
             <!-- Filter button for levelname -->
-            <LevelnameFilterButton 
-              key={key} 
-              levels={levels} 
-              dropdownWidth={dropdownWidth} 
-            />
+            <FilterDropdown filterKey={key}>
+              <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
+            </FilterDropdown>
           {:else if key === 'asctime'}
             <!-- Filter button for asctime -->
-            <AsctimeFilterButton 
-              key={key} 
-            />
+            <FilterDropdown filterKey={key}>
+              <AsctimeFilterButton slot="dropdown-content"/>
+            </FilterDropdown>
           {:else if ['filename', 'funcName', 'message', 'name'].includes(key)}
             <!-- Filter button for filename, funcName, and message -->
-            <TextFilterButton 
-              key={key} 
-            />
+            <FilterDropdown filterKey={key}>
+              <TextFilterButton slot="dropdown-content" filterKey={key}/>
+            </FilterDropdown>
           {:else}
             <!-- Placeholder button for other fields -->
             <button disabled style="opacity: 0.5;">Filter</button>

@@ -1,9 +1,6 @@
 <script>
-	import { selectedLevels, toggleDropdown, showFilter } from '../stores/logStore.js';
-  import { getDropdownPosition } from '../utils/uiHelpers.js';
-	export let key;
+	import { selectedLevels } from '../stores/logStore.js';
 	export let levels;
-	export let dropdownWidth;
 
 	function toggleLevel(level) {
 		selectedLevels.update(levels => {
@@ -18,32 +15,15 @@
 	}
 </script>
 
-<div 
-	role="button" 
-	tabindex="0" 
-	style="position: relative;" 
-	on:mouseenter={(event) => {
-		toggleDropdown(key, true);
-		const position = getDropdownPosition(event);
-    showFilter.update(current => ({...current, [key]: { visible: true, position }}))
-	}} 
-	on:mouseleave={() => toggleDropdown(key, false)}
->
-<button>Filter</button>
-{#if $showFilter[key]?.visible}
-	<div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${$showFilter[key].position.top}px; left: ${$showFilter[key].position.left}px; width: ${dropdownWidth}; z-index: 10;`}>
-		<div style="display: flex; flex-direction: column;">
-			{#each levels as level}
-				<label>
-					<input 
-						type="checkbox" 
-						checked={$selectedLevels.has(level)} 
-						on:change={() => toggleLevel(level)} 
-					/>
-					{level}
-				</label>
-			{/each}
-		</div>
-	</div>
-{/if}
+<div style="display: flex; flex-direction: column;">
+	{#each levels as level}
+		<label>
+			<input 
+				type="checkbox" 
+				checked={$selectedLevels.has(level)} 
+				on:change={() => toggleLevel(level)} 
+			/>
+			{level}
+		</label>
+	{/each}
 </div>

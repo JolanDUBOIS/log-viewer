@@ -29,3 +29,5 @@ export function toggleDropdown(key, state) {
     [key]: state
   }));
 }
+
+export const filterDropdownState = writable({}); // State for filter dropdowns

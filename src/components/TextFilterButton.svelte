@@ -1,8 +1,7 @@
 <script>
-  import { textFilters, toggleDropdown, showFilter } from '../stores/logStore.js';
-  import { getDropdownPosition } from '../utils/uiHelpers.js';
+  import { textFilters } from '../stores/logStore.js';
   import ClearTextFieldButton from './ClearTextFieldButton.svelte';
-  export let key;
+  export let filterKey;
 
   const fields = [
     { label: 'Filter In', id: `filter-in-{key}`, valueKey: 'filterIn', placeholder: 'Include text' },
@@ -19,39 +18,22 @@
   }
 </script>
 
-<div 
-  role="button" 
-  tabindex="0" 
-  style="position: relative;" 
-  on:mouseenter={(event) => {
-    toggleDropdown(key, true);
-    const position = getDropdownPosition(event);
-    showFilter.update(current => ({...current, [key]: { visible: true, position }}))
-  }} 
-  on:mouseleave={() => toggleDropdown(key, false)}
->
-  <button>Filter</button>
-  {#if $showFilter[key]?.visible}
-    <div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${$showFilter[key].position.top}px; left: ${$showFilter[key].position.left}px; min-width: 200px; z-index: 10;`}>
-      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        {#each fields as field}
-          <div>
-            <label for={field.id} style="display: block; margin-bottom: 0.3rem;">{field.label}</label>
-            <div style="position: relative;">
-              <input 
-                id={field.id}
-                type="text" 
-                bind:value={$textFilters[key][field.valueKey]}
-                placeholder={field.placeholder}
-                style="width: calc(100% - 2.5rem); padding-right: 2rem;"
-              />
-              <ClearTextFieldButton 
-                clearFunc={() => clearTextFilter(key)} 
-              />
-            </div>
-          </div>
-        {/each}
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+  {#each fields as field}
+    <div>
+      <label for={field.id} style="display: block; margin-bottom: 0.3rem;">{field.label}</label>
+      <div style="position: relative;">
+        <input 
+          id={field.id}
+          type="text" 
+          bind:value={$textFilters[filterKey][field.valueKey]}
+          placeholder={field.placeholder}
+          style="width: calc(100% - 2.5rem); padding-right: 2rem;"
+        />
+        <ClearTextFieldButton 
+          clearFunc={() => clearTextFilter(filterKey)} 
+        />
       </div>
     </div>
-  {/if}
+  {/each}
 </div>
