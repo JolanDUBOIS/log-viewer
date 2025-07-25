@@ -1,5 +1,5 @@
 <script>
-  import { logs, filteredLogs, textFilters } from '../stores/logStore.js';
+  import { textFilters } from '../stores/logStore.js';
   import ClearTextFieldButton from './ClearTextFieldButton.svelte';
   export let key;
   export let showFilter;
@@ -11,17 +11,21 @@
     { label: 'Filter Out', id: `filter-out-{key}`, valueKey: 'filterOut', placeholder: 'Exclude text' }
   ];
 
-  function filterText(field) {
-    const { filterIn, filterOut } = $textFilters[field];
-    filteredLogs.set($logs.filter(log => {
-      const value = log[field] || '';
-      return (!filterIn || value.includes(filterIn)) && (!filterOut || !value.includes(filterOut));
-    }));
-  }
+  // function filterText(field) {
+  //   const { filterIn, filterOut } = $textFilters[field];
+  //   filteredLogs.set($logs.filter(log => {
+  //     const value = log[field] || '';
+  //     return (!filterIn || value.includes(filterIn)) && (!filterOut || !value.includes(filterOut));
+  //   }));
+  // }
 
   function clearTextFilter(field) {
-    $textFilters[field] = { filterIn: '', filterOut: '' };
-    filterText(field);
+    textFilters.update(filters => {
+      return {
+        ...filters,
+        [field]: { filterIn: '', filterOut: '' }
+      };
+    });
   }
 </script>
 
@@ -47,8 +51,7 @@
               <input 
                 id={field.id}
                 type="text" 
-                bind:value={$textFilters[key][field.valueKey]} 
-                on:input={() => filterText(key)} 
+                bind:value={$textFilters[key][field.valueKey]}
                 placeholder={field.placeholder}
                 style="width: calc(100% - 2.5rem); padding-right: 2rem;"
               />

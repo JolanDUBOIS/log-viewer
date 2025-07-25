@@ -1,5 +1,5 @@
 <script>
-	import { logs, filteredLogs, asctimeFilter } from '../stores/logStore.js';
+	import { asctimeFilter } from '../stores/logStore.js';
   import ClearTextFieldButton from './ClearTextFieldButton.svelte';
   export let key;
 	export let showFilter;
@@ -11,18 +11,18 @@
     { label: 'Until', id: 'asctime-until', valueKey: 'until' }
   ]
 
-  function filterAsctime() {
-    const { from, until } = $asctimeFilter;
-    filteredLogs.set($logs.filter(log => {
-      const logTime = new Date(log.asctime);
+  // function filterAsctime() {
+  //   const { from, until } = $asctimeFilter;
+  //   filteredLogs.set($logs.filter(log => {
+  //     const logTime = new Date(log.asctime);
 
-      return (!from || logTime >= new Date(from)) && (!until || logTime <= new Date(until));
-    }));
-  }
+  //     return (!from || logTime >= new Date(from)) && (!until || logTime <= new Date(until));
+  //   }));
+  // }
 
   function clearAsctimeFilter() {
     asctimeFilter.set({ from: '', until: '' });
-    filterAsctime();
+    // filterAsctime();
   }
 </script>
 
@@ -48,8 +48,7 @@
               <input 
                 id={field.id}
                 type="text" 
-                bind:value={$asctimeFilter[field.valueKey]} 
-                on:input={filterAsctime} 
+                bind:value={$asctimeFilter[field.valueKey]}
                 placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
                 style="width: calc(100% - 2.5rem); padding-right: 2rem;"
               />

@@ -1,7 +1,9 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { handleClickOutside } from './utils/uiHelpers.js';
-  import { activeCellPopup, logs, filteredLogs, selectedLevels } from './stores/logStore.js';
+  import { applyAllFilters } from './utils/filterEngine.js';
+  import { initializeLogs } from './utils/setupApp.js';
+  import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter } from './stores/logStore.js';
   import { COLUMN_WIDTHS, headerFontSize } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
@@ -9,29 +11,40 @@
   import AsctimeFilterButton from './components/AsctimeFilterButton.svelte';
   import TextFilterButton from './components/TextFilterButton.svelte';
 
+  // This block runs each time any update occurs, that could be an issue if the app grows larger...
+  $: {
+    const result = applyAllFilters($logs, {
+      selectedLevels: $selectedLevels,
+      textFilters: $textFilters,
+      asctimeFilter: $asctimeFilter
+    });
+
+    filteredLogs.set(result);
+  }
+
   let levels = [];
   let showFilter = {}; // Object to track visibility of dropdowns for each column
   let dropdownWidth = 'auto';
+  let schema = [];
 
   function wrappedClickHandler(event) {
     handleClickOutside(event, activeCellPopup);
   }
 
+  function setSchema(value) {
+    schema = value;
+  }
+
   onMount(async () => {
-    const res = await fetch('/log.json');
-    const text = await res.text();
-    logs.set(text.split('\n').filter(line => line.trim()).map(line => JSON.parse(line)));
-    levels = [...new Set($logs.map(log => log.levelname))];
-    selectedLevels.set(new Set(levels)); // Default: all values are checked
-    filteredLogs.set($logs);
-
-    // Initialize showFilter for all keys
-    Object.keys($logs[0] || {}).forEach(key => {
-      showFilter[key] = false;
+    await initializeLogs({
+      logs,
+      filteredLogs,
+      selectedLevels,
+      setLevels: l => levels = l,
+      setShowFilter: sf => showFilter = sf,
+      setDropdownWidth: dw => dropdownWidth = dw,
+      setSchema
     });
-
-    // Calculate dropdown width based on the largest levelname
-    dropdownWidth = `${Math.max(...levels.map(level => level.length))}rem`;
 
     document.addEventListener("click", wrappedClickHandler);
   });
@@ -42,7 +55,7 @@
 
   function toggleDropdown(key, state) {
     // Toggles the visibility of the filter dropdown for a specific column.
-    showFilter[key] = state;
+    showFilter = { ...showFilter, [key]: state };
   }
 
   // Calculates the position of the dropdown relative to the clicked element.
@@ -60,12 +73,12 @@
 <table>
   <thead>
     <tr>
-      {#each Object.keys($logs[0] || {}) as key}
+      {#each schema as key}
         <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; font-size: ${headerFontSize};`}>{key}</th>
       {/each}
     </tr>
     <tr>
-      {#each Object.keys($logs[0] || {}) as key}
+      {#each schema as key}
         <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; position: relative; font-size: ${headerFontSize};`}>
           {#if key === 'levelname'}
             <!-- Filter button for levelname -->
@@ -111,10 +124,10 @@
     {:else}
       {#each $filteredLogs as log}
         <tr>
-          {#each Object.entries(log) as [key, value]}
+          {#each schema as key}
             <TableCell 
               width={COLUMN_WIDTHS[key] || 'auto'} 
-              value={value}
+              value={log[key]}
             ></TableCell>
           {/each}
         </tr>

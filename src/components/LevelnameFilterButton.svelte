@@ -1,5 +1,5 @@
 <script>
-	import { logs, filteredLogs, selectedLevels } from '../stores/logStore.js';
+	import { selectedLevels } from '../stores/logStore.js';
 	export let key;
 	export let levels;
 	export let showFilter;
@@ -7,19 +7,21 @@
   export let toggleDropdown;
 	export let getDropdownPosition;
 
-  function applyLevelFilter() {
-    filteredLogs.set($logs.filter(log => $selectedLevels.has(log.levelname)));
-  }
+  // function applyLevelFilter() {
+  //   filteredLogs.set($logs.filter(log => $selectedLevels.has(log.levelname)));
+  // }
 
-  function toggleLevel(level) {
-    // Toggles the selection state of a log level and updates the filtered logs.
-    if ($selectedLevels.has(level)) {
-      $selectedLevels.delete(level);
-    } else {
-      $selectedLevels.add(level);
-    }
-    applyLevelFilter();
-  }
+	function toggleLevel(level) {
+		selectedLevels.update(levels => {
+			const newSet = new Set(levels);
+			if (newSet.has(level)) {
+				newSet.delete(level);
+			} else {
+				newSet.add(level);
+			}
+			return newSet;
+		});
+	}
 </script>
 
 <div 
