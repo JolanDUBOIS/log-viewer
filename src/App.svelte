@@ -1,331 +1,106 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { handleClickOutside } from './utils/uiHelpers.js';
+  import { applyAllFilters } from './utils/filterEngine.js';
+  import { initializeLogs } from './utils/setupApp.js';
+  import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter, showFilter, filterDropdownState } from './stores/logStore.js';
+  import { COLUMN_WIDTHS, headerFontSize } from './constants.js';
+  import ActiveCellPopup from './components/ActiveCellPopup.svelte';
+  import TableCell from './components/TableCell.svelte';
+  import LevelnameFilterButton from './components/LevelnameFilterButton.svelte';
+  import AsctimeFilterButton from './components/AsctimeFilterButton.svelte';
+  import TextFilterButton from './components/TextFilterButton.svelte';
+  import Footer from './components/Footer.svelte';
+  import FilterDropdown from './components/FilterDropdown.svelte';
 
-  let logs = [];
-  let filteredLogs = [];
+  // This block runs each time any update occurs, that could be an issue if the app grows larger...
+  $: {
+    const result = applyAllFilters($logs, {
+      selectedLevels: $selectedLevels,
+      textFilters: $textFilters,
+      asctimeFilter: $asctimeFilter
+    });
+
+    filteredLogs.set(result);
+  }
+
   let levels = [];
-  let selectedLevels = new Set();
-  let showFilter = {}; // Object to track visibility of dropdowns for each column
   let dropdownWidth = 'auto';
-  let asctimeFilter = { from: '', until: '' };
-  let textFilters = {
-    name: { filterIn: '', filterOut: '' },
-    filename: { filterIn: '', filterOut: '' },
-    funcName: { filterIn: '', filterOut: '' },
-    message: { filterIn: '', filterOut: '' },
-  };
+  let schema = [];
 
-  const COLUMN_WIDTHS = {
-    asctime: '150px',
-    levelname: '100px',
-    name: '120px',
-    filename: '150px',
-    lineno: '80px',
-    funcName: '120px',
-    message: '1000px',
-  };
-
-  let activeCellContent = null; // Tracks the content of the clicked cell
-  let activeCellPosition = null; // Tracks the position of the sub-element
-  let closeOnHoverOutside = false; // Boolean to toggle hover-based closing
-
-  function showCellContent(event, content) {
-    if (activeCellContent === content) {
-      activeCellContent = null;
-      activeCellPosition = null;
-    } else {
-      const rect = event.target.getBoundingClientRect();
-      const tableRect = document.querySelector("table").getBoundingClientRect();
-      activeCellContent = content;
-      activeCellPosition = {
-        top: rect.bottom + window.scrollY,
-        left: Math.min(rect.left, tableRect.right - rect.width), // Align left unless it overflows
-        width: Math.min(rect.width, tableRect.width), // Ensure width fits within the table
-      };
-    }
+  function wrappedClickHandler(event) {
+    handleClickOutside(event, activeCellPopup);
   }
 
-  function hideCellContent() {
-    if (!closeOnHoverOutside) return; // Only hide if hover-based closing is enabled
-    activeCellContent = null;
-    activeCellPosition = null;
-  }
-
-  function handleClickOutside(event) {
-    const subWindow = document.querySelector(".subwindow");
-    const clickedCell = event.target.closest("td div");
-    if (subWindow && !subWindow.contains(event.target) && !clickedCell) {
-      activeCellContent = null;
-      activeCellPosition = null;
-    }
+  function setSchema(value) {
+    schema = value;
   }
 
   onMount(async () => {
-    const res = await fetch('/log.json');
-    const text = await res.text();
-    logs = text.split('\n').filter(line => line.trim()).map(line => JSON.parse(line));
-    levels = [...new Set(logs.map(log => log.levelname))];
-    selectedLevels = new Set(levels); // Default: all values are checked
-    filteredLogs = logs;
-
-    // Initialize showFilter for all keys
-    Object.keys(logs[0] || {}).forEach(key => {
-      showFilter[key] = false;
+    await initializeLogs({
+      logs,
+      filteredLogs,
+      selectedLevels,
+      showFilter,
+      filterDropdownState,
+      setLevels: l => levels = l,
+      setDropdownWidth: dw => dropdownWidth = dw,
+      setSchema
     });
 
-    // Calculate dropdown width based on the largest levelname
-    dropdownWidth = `${Math.max(...levels.map(level => level.length)) * 1}rem`;
-
-    document.addEventListener("click", handleClickOutside);
+    document.addEventListener("click", wrappedClickHandler);
   });
 
   onDestroy(() => {
-    document.removeEventListener("click", handleClickOutside);
+    document.removeEventListener("click", wrappedClickHandler);
   });
-
-  function filterLogs() {
-    filteredLogs = logs.filter(log => selectedLevels.has(log.levelname));
-  }
-
-  function toggleLevel(level) {
-    if (selectedLevels.has(level)) {
-      selectedLevels.delete(level);
-    } else {
-      selectedLevels.add(level);
-    }
-    filterLogs();
-  }
-
-  function filterAsctime() {
-    const { from, until } = asctimeFilter;
-    filteredLogs = logs.filter(log => {
-      const logTime = new Date(log.asctime);
-
-      return (!from || logTime >= new Date(from)) && (!until || logTime <= new Date(until));
-    });
-  }
-
-  function filterText(field) {
-    const { filterIn, filterOut } = textFilters[field];
-    filteredLogs = logs.filter(log => {
-      const value = log[field] || '';
-      return (!filterIn || value.includes(filterIn)) && (!filterOut || !value.includes(filterOut));
-    });
-  }
-
-  function toggleDropdown(key, state) {
-    showFilter[key] = state;
-  }
-
-  function clearAsctimeFilter() {
-    asctimeFilter = { from: '', until: '' };
-    filterAsctime();
-  }
-
-  function clearTextFilter(field) {
-    textFilters[field] = { filterIn: '', filterOut: '' };
-    filterText(field);
-  }
-
-  function getDropdownPosition(event) {
-    const rect = event.target.getBoundingClientRect();
-    return {
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    };
-  }
 </script>
 
 <h1>Log Viewer</h1>
 
 <table>
   <thead>
-    <tr>
-      {#each Object.keys(filteredLogs[0] || logs[0] || {}) as key}
-        <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'};`}>{key}</th>
-      {/each}
-    </tr>
-    <tr>
-      {#each Object.keys(filteredLogs[0] || logs[0] || {}) as key}
-        <th style={`width: ${COLUMN_WIDTHS[key] || 'auto'}; position: relative;`}>
-          {#if key === 'levelname'}
+    <tr style="position: sticky; top: 0; background: #fff; z-index: 1;">
+      {#each schema as filterKey}
+        <th style={`width: ${COLUMN_WIDTHS[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
+          {#if filterKey === 'levelname'}
             <!-- Filter button for levelname -->
-            <div 
-              role="button" 
-              tabindex="0" 
-              style="position: relative;" 
-              on:mouseenter={(event) => {
-                toggleDropdown(key, true);
-                const position = getDropdownPosition(event);
-                showFilter[key] = { visible: true, position };
-              }} 
-              on:mouseleave={() => toggleDropdown(key, false)}
-            >
-              <button>Filter</button>
-              {#if showFilter[key]?.visible}
-                <div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${showFilter[key].position.top}px; left: ${showFilter[key].position.left}px; width: ${dropdownWidth}; z-index: 10;`}>
-                  <div style="display: flex; flex-direction: column;">
-                    {#each levels as level}
-                      <label>
-                        <input 
-                          type="checkbox" 
-                          checked={selectedLevels.has(level)} 
-                          on:change={() => toggleLevel(level)} 
-                        />
-                        {level}
-                      </label>
-                    {/each}
-                  </div>
-                </div>
-              {/if}
-            </div>
-          {:else if key === 'asctime'}
+            <FilterDropdown filterKey={filterKey}>
+              <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
+            </FilterDropdown>
+          {:else if filterKey === 'asctime'}
             <!-- Filter button for asctime -->
-            <div 
-              role="button" 
-              tabindex="0" 
-              style="position: relative;" 
-              on:mouseenter={(event) => {
-                toggleDropdown(key, true);
-                const position = getDropdownPosition(event);
-                showFilter[key] = { visible: true, position };
-              }} 
-              on:mouseleave={() => toggleDropdown(key, false)}
-            >
-              <button>Filter</button>
-              {#if showFilter[key]?.visible}
-                <div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${showFilter[key].position.top}px; left: ${showFilter[key].position.left}px; min-width: 200px; z-index: 10;`}>
-                  <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <div>
-                      <label for="asctime-from" style="display: block; margin-bottom: 0.3rem;">From</label>
-                      <div style="position: relative;">
-                        <input 
-                          id="asctime-from"
-                          type="text" 
-                          bind:value={asctimeFilter.from} 
-                          on:input={filterAsctime} 
-                          placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
-                          style="width: calc(100% - 2.5rem); padding-right: 2rem;"
-                        />
-                        <button 
-                          style="position: absolute; top: 50%; right: 0.3rem; transform: translateY(-50%); font-size: 0.8rem; padding: 0; border: none; background: transparent; cursor: pointer;" 
-                          on:click={clearAsctimeFilter}
-                        >
-                          ✖
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label for="asctime-until" style="display: block; margin-bottom: 0.3rem;">Until</label>
-                      <div style="position: relative;">
-                        <input 
-                          id="asctime-until"
-                          type="text" 
-                          bind:value={asctimeFilter.until} 
-                          on:input={filterAsctime} 
-                          placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
-                          style="width: calc(100% - 2.5rem); padding-right: 2rem;"
-                        />
-                        <button 
-                          style="position: absolute; top: 50%; right: 0.3rem; transform: translateY(-50%); font-size: 0.8rem; padding: 0; border: none; background: transparent; cursor: pointer;" 
-                          on:click={clearAsctimeFilter}
-                        >
-                          ✖
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              {/if}
-            </div>
-          {:else if ['filename', 'funcName', 'message', 'name'].includes(key)}
+            <FilterDropdown filterKey={filterKey}>
+              <AsctimeFilterButton slot="dropdown-content"/>
+            </FilterDropdown>
+          {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
             <!-- Filter button for filename, funcName, and message -->
-            <div 
-              role="button" 
-              tabindex="0" 
-              style="position: relative;" 
-              on:mouseenter={(event) => {
-                toggleDropdown(key, true);
-                const position = getDropdownPosition(event);
-                showFilter[key] = { visible: true, position };
-              }} 
-              on:mouseleave={() => toggleDropdown(key, false)}
-            >
-              <button>Filter</button>
-              {#if showFilter[key]?.visible}
-                <div style={`border: 1px solid #ccc; padding: 0.5rem; background: #fff; position: fixed; top: ${showFilter[key].position.top}px; left: ${showFilter[key].position.left}px; min-width: 200px; z-index: 10;`}>
-                  <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <div>
-                      <label for="filter-in-{key}" style="display: block; margin-bottom: 0.3rem;">Filter In</label>
-                      <div style="position: relative;">
-                        <input 
-                          id="filter-in-{key}"
-                          type="text" 
-                          bind:value={textFilters[key].filterIn} 
-                          on:input={() => filterText(key)} 
-                          placeholder="Include text"
-                          style="width: calc(100% - 2.5rem); padding-right: 2rem;"
-                        />
-                        <button 
-                          style="position: absolute; top: 50%; right: 0.3rem; transform: translateY(-50%); font-size: 0.8rem; padding: 0; border: none; background: transparent; cursor: pointer;" 
-                          on:click={() => clearTextFilter(key)}
-                        >
-                          ✖
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label for="filter-out-{key}" style="display: block; margin-bottom: 0.3rem;">Filter Out</label>
-                      <div style="position: relative;">
-                        <input 
-                          id="filter-out-{key}"
-                          type="text" 
-                          bind:value={textFilters[key].filterOut} 
-                          on:input={() => filterText(key)} 
-                          placeholder="Exclude text"
-                          style="width: calc(100% - 2.5rem); padding-right: 2rem;"
-                        />
-                        <button 
-                          style="position: absolute; top: 50%; right: 0.3rem; transform: translateY(-50%); font-size: 0.8rem; padding: 0; border: none; background: transparent; cursor: pointer;" 
-                          on:click={() => clearTextFilter(key)}
-                        >
-                          ✖
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              {/if}
-            </div>
+            <FilterDropdown filterKey={filterKey}>
+              <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
+            </FilterDropdown>
           {:else}
             <!-- Placeholder button for other fields -->
-            <button disabled style="opacity: 0.5;">Filter</button>
+            <button disabled style="opacity: 0.5;">{filterKey}</button>
           {/if}
         </th>
       {/each}
     </tr>
   </thead>
   <tbody>
-    {#if filteredLogs.length === 0}
+    {#if $filteredLogs.length === 0}
       <tr>
-        <td colspan="{Object.keys(filteredLogs[0] || logs[0] || {}).length}" style="text-align: center;">
+        <td colspan="{Object.keys($filteredLogs[0] || $logs[0] || {}).length}" style="text-align: center;">
           No rows match the filters.
         </td>
       </tr>
     {:else}
-      {#each filteredLogs as log}
+      {#each $filteredLogs as log}
         <tr>
-          {#each Object.entries(log) as [key, value]}
-            <td style={`width: ${COLUMN_WIDTHS[key] || 'auto'};`}>
-              <!-- svelte-ignore a11y_click_events_have_key_events -->
-              <!-- svelte-ignore a11y_no_static_element_interactions -->
-              <div 
-                style="overflow-x: auto; white-space: nowrap; cursor: pointer;" 
-                on:click={(event) => showCellContent(event, value)}
-              >
-                {value}
-              </div>
-            </td>
+          {#each schema as key}
+            <TableCell 
+              width={COLUMN_WIDTHS[key] || 'auto'} 
+              value={log[key]}
+            ></TableCell>
           {/each}
         </tr>
       {/each}
@@ -333,19 +108,9 @@
   </tbody>
 </table>
 
-{#if activeCellContent}
-  <!-- Conditional event binding -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div 
-    class="subwindow"
-    style={`position: absolute; top: ${activeCellPosition.top}px; left: ${activeCellPosition.left}px; max-width: calc(100vw - 40px); background: #fff; border: 1px solid #ccc; padding: 0.4rem 0.6rem; z-index: 20; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);`}
-    on:mouseleave={closeOnHoverOutside ? hideCellContent : null}
-  >
-    <div style="white-space: pre-wrap; word-wrap: break-word; font-size: inherit; font-family: inherit; text-align: left;">
-      {activeCellContent}
-    </div>
-  </div>
-{/if}
+<ActiveCellPopup />
+
+<Footer />
 
 <style>
   :global(#app) {
@@ -371,27 +136,10 @@
     text-overflow: ellipsis; /* Add ellipsis for overflow content */
   }
 
-  td div {
-    overflow-x: auto; /* Enable horizontal scrolling for cell content */
-    white-space: nowrap; /* Prevent wrapping of text */
-  }
-
-  td div::-webkit-scrollbar {
-    height: 5px; /* Set scrollbar thickness */
-  }
-
-  td div::-webkit-scrollbar-thumb {
-    background: #ccc; /* Set scrollbar thumb color */
-    border-radius: 3px; /* Round scrollbar edges */
-  }
-
-  td div::-webkit-scrollbar-track {
-    background: #f1f1f1; /* Set scrollbar track color */
-  }
-
   th {
     background: #eee;
     position: relative; /* Ensure filter dropdown is positioned correctly */
+    border: 2px solid #ccc; /* Thicker border for table head cells */
   }
 
   tbody tr:nth-child(even) {
