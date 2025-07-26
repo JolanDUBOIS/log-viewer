@@ -1,9 +1,19 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { handleClickOutside } from './utils/uiHelpers.js';
-  import { applyAllFilters } from './utils/logEngine.js';
+  import { applyAllFilters, sortLogs } from './utils/logEngine.js';
   import { initializeLogs } from './utils/setupApp.js';
-  import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter, filterDropdownState } from './stores/logStore.js';
+  import {
+    activeCellPopup,
+    logs,
+    filteredLogs,
+    displayedLogs,
+    selectedLevels,
+    textFilters,
+    asctimeFilter,
+    filterDropdownState,
+    sortOrder 
+  } from './stores/logStore.js';
   import { COLUMN_WIDTHS, headerFontSize, headerHeight } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
@@ -22,6 +32,11 @@
     });
 
     filteredLogs.set(result);
+  }
+
+  $: {
+    const sortedLogs = sortLogs($filteredLogs, $sortOrder);
+    displayedLogs.set(sortedLogs);
   }
 
   let levels = [];
@@ -120,14 +135,14 @@
     </tr>
   </thead>
   <tbody>
-    {#if $filteredLogs.length === 0}
+    {#if $displayedLogs.length === 0}
       <tr>
-        <td colspan="{Object.keys($filteredLogs[0] || $logs[0] || {}).length}" style="text-align: center;">
+        <td colspan="{Object.keys($displayedLogs[0] || $logs[0] || {}).length}" style="text-align: center;">
           No rows match the filters.
         </td>
       </tr>
     {:else}
-      {#each $filteredLogs as log}
+      {#each $displayedLogs as log}
         <tr>
           {#each schema as key}
             <TableCell 

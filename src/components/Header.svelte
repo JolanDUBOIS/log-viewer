@@ -1,11 +1,9 @@
 <script>
-  import { filteredLogs, logs } from '../stores/logStore.js'; 
+  import { filteredLogs, logs, sortOrder } from '../stores/logStore.js'; 
   import { headerHeight } from '../constants.js';
 
-  let order = 'desc'; // 'asc' or 'desc'
-
   function toggleOrder() {
-    order = order === 'asc' ? 'desc' : 'asc';
+    sortOrder.update(o => o === 'asc' ? 'desc' : 'asc');
   }
 </script>
 
@@ -14,7 +12,7 @@
   <div class="center-section">Log Viewer</div>
   <div class="right-section">
     <button class="order-toggle-button" on:click={toggleOrder} aria-label="Toggle sort order" title="Toggle sort order">
-      {#if order === 'asc'}
+      {#if $sortOrder === 'asc'}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12" />
         </svg>
