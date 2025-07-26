@@ -24,3 +24,12 @@ export function applyAllFilters(logs, { selectedLevels, textFilters, asctimeFilt
     return true;
   });
 }
+
+export function sortLogs(logs, order) {
+  if (!Array.isArray(logs)) return [];
+
+  return [...logs].sort((a, b) => {
+    const diff = a.created - b.created;
+    return order === 'asc' ? diff : -diff;
+  });
+}
