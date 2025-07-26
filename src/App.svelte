@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { handleClickOutside } from './utils/uiHelpers.js';
-  import { applyAllFilters } from './utils/filterEngine.js';
+  import { applyAllFilters } from './utils/logEngine.js';
   import { initializeLogs } from './utils/setupApp.js';
   import { activeCellPopup, logs, filteredLogs, selectedLevels, textFilters, asctimeFilter, filterDropdownState } from './stores/logStore.js';
   import { COLUMN_WIDTHS, headerFontSize, headerHeight } from './constants.js';
