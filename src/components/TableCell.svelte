@@ -32,6 +32,7 @@
     white-space: nowrap; /* Ensure all fields are displayed as one-liners */
     overflow: hidden; /* Hide overflow content */
     text-overflow: ellipsis; /* Add ellipsis for overflow content */
+    font-size: 0.85rem; /* Reduce font size for normal cells */
   }
 
   td div {

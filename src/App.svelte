@@ -164,8 +164,8 @@
   }
 
   :global(#app) {
-    margin-left: 20px;
-    margin-right: 20px;
+    margin-left: 0px;
+    margin-right: 0px;
     padding: 0; /* Remove any padding from the app container */
   }
 
@@ -190,6 +190,7 @@
     background: #eee;
     position: relative; /* Ensure filter dropdown is positioned correctly */
     border: 2px solid #ccc; /* Thicker border for table head cells */
+    font-size: 0.9rem; /* Reduce font size for header cells */
   }
 
   th div {
