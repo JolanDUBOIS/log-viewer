@@ -107,22 +107,22 @@
         <th style={`width: ${COLUMN_WIDTHS[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
           {#if filterKey === 'levelname'}
             <!-- Filter button for levelname -->
-            <FilterDropdown filterKey={filterKey}>
+            <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
               <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
             </FilterDropdown>
           {:else if filterKey === 'asctime'}
             <!-- Filter button for asctime -->
-            <FilterDropdown filterKey={filterKey}>
+            <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
               <AsctimeFilterButton slot="dropdown-content"/>
             </FilterDropdown>
           {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
             <!-- Filter button for filename, funcName, and message -->
-            <FilterDropdown filterKey={filterKey}>
+            <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
               <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
             </FilterDropdown>
           {:else}
             <!-- Placeholder button for other fields -->
-            <button disabled style="opacity: 0.5;">{filterKey}</button>
+            <button disabled style="opacity: 0.5;">{columnLayoutConfig[filterKey].alias}</button>
           {/if}
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <div 
