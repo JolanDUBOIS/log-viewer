@@ -1,25 +1,24 @@
 <script>
-  import { activeCellPopup, closeOnHoverOutside } from '../stores/logStore.js';
-  import { hideCellContent } from '../utils/uiHelpers.js';
-
-  function handleMouseLeave() {
-    hideCellContent(closeOnHoverOutside, activeCellPopup);
-  }
+  import { activeCellPopup } from '../stores/logStore.js';
+  $: console.log('ActiveCellPopup store value:', $activeCellPopup);
 </script>
 
 {#if $activeCellPopup}
   <div 
-    class="subwindow"
+    class="cell-popup"
     aria-hidden="true"
-    style={`top: ${$activeCellPopup.position.top}px; left: ${$activeCellPopup.position.left}px;`}
-    on:mouseleave={handleMouseLeave}
+    style={`
+      top: ${$activeCellPopup.position.top}px;
+      left: ${$activeCellPopup.position.left}px;
+      width: ${$activeCellPopup.dimensions.width}px;
+    `}
   >
       {$activeCellPopup.content}
   </div>
 {/if}
 
 <style>
-  .subwindow {
+  .cell-popup {
     position: absolute;
     max-width: calc(100vw - 40px);
     background: #fff;

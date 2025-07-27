@@ -1,14 +1,5 @@
 import { writable } from 'svelte/store';
 
-/**
- * The active cell popup state.
- * - null = no popup
- * - { content: string, position: { top, left, width? } }
- */
-export const activeCellPopup = writable(null);
-
-export const closeOnHoverOutside = writable(false); // Whether to close the popup on hover outside
-
 export const logs = writable([]); // Array of all logs
 export const filteredLogs = writable([]); // Array of filtered logs
 export const displayedLogs = writable([]); // Array of logs currently displayed in the table
@@ -25,3 +16,16 @@ export const textFilters = writable({
 export const filterDropdownState = writable({}); // State for filter dropdowns
 
 export const sortOrder = writable('asc'); // Current sort order for logs (asc or desc)
+
+
+/**
+ * The active cell popup state.
+ * - null = no popup
+ * - {
+ *  content: string;
+ *  position: { top: number, left: number };
+ *  dimensions: { width: number, height?: number },
+ *  sourceRect?: DOMRect
+ *  }
+ */
+export const activeCellPopup = writable(null);
