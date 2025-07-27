@@ -17,7 +17,6 @@ export const filterDropdownState = writable({}); // State for filter dropdowns
 
 export const sortOrder = writable('asc'); // Current sort order for logs (asc or desc)
 
-
 /**
  * The active cell popup state.
  * - null = no popup

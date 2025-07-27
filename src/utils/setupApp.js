@@ -5,7 +5,7 @@ export async function initializeLogs({
   filterDropdownState,
   setLevels,
   setDropdownWidth,
-  setSchema // <-- NEW PARAM
+  setSchema
 }) {
   const res = await fetch('/log.json');
   const text = await res.text();
