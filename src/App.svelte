@@ -4,7 +4,6 @@
   import { applyAllFilters, sortLogs } from './utils/logEngine.js';
   import { initializeLogs } from './utils/setupApp.js';
   import {
-    activeCellPopup,
     logs,
     filteredLogs,
     displayedLogs,
@@ -44,7 +43,7 @@
   let schema = [];
 
   function wrappedClickHandler(event) {
-    handleClickOutside(event, activeCellPopup);
+    handleClickOutside(event);
   }
 
   function setSchema(value) {

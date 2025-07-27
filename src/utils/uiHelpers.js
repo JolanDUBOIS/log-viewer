@@ -1,30 +1,6 @@
-import { get } from 'svelte/store';
+import { activeCellPopup } from "../stores/logStore";
 
-export function showCellContent(event, value, activeCellPopup) {
-  const rect = event.target.getBoundingClientRect();
-  activeCellPopup.set({
-    content: value,
-    position: {
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    },
-  });
-}
-
-export function hideCellContent(closeOnHoverOutside, activeCellPopup) {
-    if (!get(closeOnHoverOutside)) return; // Only hide if hover-based closing is enabled
-    activeCellPopup.set(null);
-  }
-
-export function handleClickOutside(event, activeCellPopup) {
-    const subWindow = document.querySelector(".subwindow");
-    const clickedCell = event.target.closest("td div");
-
-    if (subWindow && !subWindow.contains(event.target) && !clickedCell) {
-      activeCellPopup.set(null);
-    }
-  }
-
+// For Filter Dropdowns
 export function getDropdownPosition(event) {
   const rect = event.target.getBoundingClientRect();
   return {
@@ -32,3 +8,29 @@ export function getDropdownPosition(event) {
     left: rect.left,
   };
 }
+
+// For Active Cell Popups
+export function showCellContent(event, value) {
+  const cellElement = event.currentTarget;
+  const rect = cellElement.getBoundingClientRect();
+
+  activeCellPopup.set({
+    content: value,
+    position: {
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+    },
+    dimensions: {
+      width: rect.width,
+    },
+    sourceRect: rect,
+  });
+}
+
+export function handleClickOutside(event) {
+    const cellPopupEl = document.querySelector(".cell-popup");
+    
+    if (cellPopupEl && !cellPopupEl.contains(event.target)) {
+      activeCellPopup.set(null);
+    }
+  }
