@@ -13,7 +13,7 @@
     filterDropdownState,
     sortOrder 
   } from './stores/logStore.js';
-  import { COLUMN_WIDTHS, headerFontSize, headerHeight } from './constants.js';
+  import { COLUMN_WIDTHS, headerFontSize, headerHeight, columnLayoutConfig } from './constants.js';
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import TableCell from './components/TableCell.svelte';
   import LevelnameFilterButton from './components/LevelnameFilterButton.svelte';
