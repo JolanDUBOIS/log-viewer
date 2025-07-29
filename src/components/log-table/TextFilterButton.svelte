@@ -1,5 +1,5 @@
 <script>
-  import { textFilters } from '../stores/logStore.js';
+  import { textFilters } from '../../stores/logStore.js';
   import ClearTextFieldButton from './ClearTextFieldButton.svelte';
   export let filterKey;
 

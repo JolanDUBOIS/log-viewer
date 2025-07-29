@@ -29,4 +29,3 @@ export const sortOrder = writable('asc'); // Current sort order for logs (asc or
  *  sourceRect?: DOMRect
  *  }
  */
-export const activeCellPopup = writable(null);

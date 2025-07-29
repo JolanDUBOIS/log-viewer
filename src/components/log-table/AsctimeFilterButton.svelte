@@ -1,5 +1,5 @@
 <script>
-	import { asctimeFilter } from '../stores/logStore.js';
+	import { asctimeFilter } from '../../stores/logStore.js';
   import ClearTextFieldButton from './ClearTextFieldButton.svelte';
 
   const fields = [

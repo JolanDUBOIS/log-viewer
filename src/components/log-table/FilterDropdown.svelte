@@ -1,7 +1,7 @@
 <script>
-	import { filterDropdownState } from '../stores/logStore.js';
-  import { isDropdownVisible } from '../utils/dropdownHelpers.js';
-  import { getDropdownPosition } from '../utils/uiHelpers.js';
+	import { filterDropdownState } from '../../stores/logStore.js';
+  import { isDropdownVisible } from '../../utils/dropdownHelpers.js';
+  import { getDropdownPosition } from '../../utils/uiHelpers.js';
   export let filterKey;
   export let filterName;
 
