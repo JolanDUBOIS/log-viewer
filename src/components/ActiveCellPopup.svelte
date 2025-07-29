@@ -1,5 +1,5 @@
 <script>
-  import { activeCellPopup } from '../stores/logStore.js';
+  import { activeCellPopup } from '../stores/uiStore.js';
   $: console.log('ActiveCellPopup store value:', $activeCellPopup);
 </script>
 
