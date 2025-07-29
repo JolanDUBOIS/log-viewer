@@ -1,6 +1,6 @@
 <script>
-  import { logs, displayedLogs } from '../../stores/logStore.js';
-  import { COLUMN_WIDTHS, headerFontSize, headerHeight, columnLayoutConfig } from '../../constants.js';
+  import { logs, displayedLogs, columnWidths } from '../../stores/logStore.js';
+  import { headerFontSize, headerHeight, columnLayoutConfig } from '../../constants.js';
   import TableCell from './TableCell.svelte';
   import LevelnameFilterButton from './LevelnameFilterButton.svelte';
   import AsctimeFilterButton from './AsctimeFilterButton.svelte';
@@ -14,7 +14,7 @@
   function handleMouseDown(event, filterKey) {
     resizingColumn = filterKey;
     startX = event.clientX;
-    startWidth = parseInt(COLUMN_WIDTHS[filterKey], 10) || 0; // Ensure startWidth is a number
+    startWidth = parseInt($columnWidths[filterKey], 10) || 0; // Ensure startWidth is a number
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }
@@ -23,7 +23,10 @@
     if (resizingColumn) {
       const deltaX = event.clientX - startX;
       const newWidth = Math.max(50, parseInt(String(startWidth), 10) + deltaX) + 'px'; // Convert startWidth to string
-      COLUMN_WIDTHS[resizingColumn] = newWidth;
+      columnWidths.update(current => ({
+        ...current,
+        [resizingColumn]: newWidth
+      }));
     }
   }
 
@@ -44,7 +47,7 @@
   <thead>
     <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
       {#each schema as filterKey}
-        <th style={`width: ${COLUMN_WIDTHS[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
+        <th style={`width: ${$columnWidths[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
           {#if filterKey === 'levelname'}
             <!-- Filter button for levelname -->
             <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
@@ -62,7 +65,7 @@
             </FilterDropdown>
           {:else}
             <!-- Placeholder button for other fields -->
-            <button disabled style="opacity: 0.5;">{columnLayoutConfig[filterKey].alias}</button>
+            <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{columnLayoutConfig[filterKey].alias}</button>
           {/if}
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <div 
@@ -85,7 +88,7 @@
         <tr>
           {#each schema as key}
             <TableCell 
-              width={COLUMN_WIDTHS[key] || 'auto'} 
+              width={$columnWidths[key] || 'auto'} 
               value={log[key]}
             ></TableCell>
           {/each}

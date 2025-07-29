@@ -7,10 +7,22 @@ export const COLUMN_WIDTHS = {
   funcName: '100px',
   message: '1000px',
 };
+
+export const COLUMN_SIZE_LIMITS = {
+  width: {
+    min: 50,
+    minCreation: 50,
+    max: 1500,
+    maxCreation: 1200,
+  }
+} // In px
+
+
 export const headerFontSize = '1rem'; // Font size for the top row
 export const cellFontSize = '0.9rem'; // Font size for the normal cells below
 
 export const headerHeight = '60px'; // Height of the header row
+
 
 export const columnLayoutConfig = {
   created: {

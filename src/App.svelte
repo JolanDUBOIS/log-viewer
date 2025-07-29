@@ -10,7 +10,6 @@
     selectedLevels,
     textFilters,
     asctimeFilter,
-    filterDropdownState,
     sortOrder 
   } from './stores/logStore.js';
   import { isSidePanelOpen } from './stores/uiStore.js';
@@ -49,10 +48,6 @@
 
   onMount(async () => {
     await initializeLogs({
-      logs,
-      filteredLogs,
-      selectedLevels,
-      filterDropdownState,
       setLevels: l => levels = l,
       setDropdownWidth: dw => dropdownWidth = dw,
       setSchema

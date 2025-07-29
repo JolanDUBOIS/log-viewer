@@ -1,8 +1,56 @@
+import { COLUMN_SIZE_LIMITS } from '../constants.js';
+import { logs, filteredLogs, columnWidths, columnsShown, selectedLevels, filterDropdownState } from '../stores/logStore.js';
+
+function initializeColumnWidths(logs) {
+  if (!logs || logs.length === 0) {
+    columnWidths.set({}); // reset global store to empty object
+    return;
+  }
+
+  const firstRow = logs[0];
+  const newWidths = {};
+
+  for (const column of Object.keys(firstRow)) {
+    const maxContentLength = logs.reduce((max, row) => {
+      const val = row[column];
+      const str = val !== undefined && val !== null ? String(val) : '';
+      return Math.max(max, str.length);
+    }, 0);
+
+    console.log(`Column: ${column}, Max Content Length: ${maxContentLength}`);
+
+    const estimatedWidth = maxContentLength * 8;
+
+    const finalWidth = Math.min(
+      COLUMN_SIZE_LIMITS.width.maxCreation,
+      Math.max(COLUMN_SIZE_LIMITS.width.minCreation, estimatedWidth)
+    );
+
+    newWidths[column] = `${finalWidth}px`;
+  }
+
+  // Update the writable store here
+  columnWidths.set(newWidths);
+}
+
+function initializeColumnsShown(logs) {
+  if (!logs || logs.length === 0) {
+    columnsShown.set({}); // reset global store to empty object
+    return;
+  }
+
+  const firstRow = logs[0];
+  const newColumnsShown = {};
+
+  for (const column of Object.keys(firstRow)) {
+    newColumnsShown[column] = true; // initialize all columns to true
+  }
+
+  // Update the writable store here
+  columnsShown.set(newColumnsShown);
+}
+
 export async function initializeLogs({
-  logs,
-  filteredLogs,
-  selectedLevels,
-  filterDropdownState,
   setLevels,
   setDropdownWidth,
   setSchema
@@ -31,4 +79,7 @@ export async function initializeLogs({
 
   // Dropdown width based on longest level name
   setDropdownWidth(`${Math.max(...levels.map(level => level.length))}rem`);
+
+  initializeColumnWidths(parsedLogs);
+  initializeColumnsShown(parsedLogs);
 }
