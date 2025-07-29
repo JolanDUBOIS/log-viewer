@@ -1,4 +1,4 @@
-import { activeCellPopup } from "../stores/logStore";
+import { activeCellPopup } from "../stores/uiStore";
 
 // For Filter Dropdowns
 export function getDropdownPosition(event) {
