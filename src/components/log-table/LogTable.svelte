@@ -42,7 +42,7 @@
 
 <table style={`margin-top: ${marginTop};`}>
   <thead>
-    <tr style={`position: sticky; top: ${headerHeight}; background: #fff; z-index: 1;`}>
+    <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
       {#each schema as filterKey}
         <th style={`width: ${COLUMN_WIDTHS[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
           {#if filterKey === 'levelname'}
