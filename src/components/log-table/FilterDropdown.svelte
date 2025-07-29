@@ -1,8 +1,9 @@
 <script>
-	import { filterDropdownState } from '../stores/logStore.js';
-  import { isDropdownVisible } from '../utils/dropdownHelpers.js';
-  import { getDropdownPosition } from '../utils/uiHelpers.js';
+	import { filterDropdownState } from '../../stores/logStore.js';
+  import { isDropdownVisible } from '../../utils/dropdownHelpers.js';
+  import { getDropdownPosition } from '../../utils/uiHelpers.js';
   export let filterKey;
+  export let filterName;
 
   function setHover(part, value) {
     filterDropdownState.update(state => ({
@@ -34,7 +35,7 @@
     on:mouseleave={() => setHover('buttonHovered', false)}
     style="width: 100%; display: flex; align-items: center; justify-content: center;"
   >
-    {filterKey}
+    {filterName}
   </button>
   {#if isDropdownVisible(filterKey, $filterDropdownState)}
     <div

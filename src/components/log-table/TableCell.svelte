@@ -1,6 +1,5 @@
 <script>
-  import { showCellContent } from "../utils/uiHelpers";
-  import { activeCellPopup } from '../stores/logStore.js';
+  import { showCellContent } from "../../utils/uiHelpers";
   export let width;
   export let value;
 </script>
@@ -10,7 +9,10 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class="table-cell"
-    on:click={(event) => showCellContent(event, value, activeCellPopup)}
+    on:click={(event) => {
+      event.stopPropagation();
+      showCellContent(event, value);
+    }}
   >
     {value}
   </div>
@@ -30,6 +32,7 @@
     white-space: nowrap; /* Ensure all fields are displayed as one-liners */
     overflow: hidden; /* Hide overflow content */
     text-overflow: ellipsis; /* Add ellipsis for overflow content */
+    font-size: 0.85rem; /* Reduce font size for normal cells */
   }
 
   td div {
