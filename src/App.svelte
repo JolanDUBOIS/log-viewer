@@ -18,7 +18,6 @@
   import SidePanel from './components/SidePanel.svelte';
   import LogTable from './components/log-table/LogTable.svelte';
 
-  // This block runs each time any update occurs, that could be an issue if the app grows larger...
   $: {
     const result = applyAllFilters($logs, {
       selectedLevels: $selectedLevels,
@@ -33,14 +32,15 @@
     const sortedLogs = sortLogs($filteredLogs, $sortOrder);
     displayedLogs.set(sortedLogs);
   }
-
-  let levels = [];
-  let dropdownWidth = 'auto';
-  let schema = [];
-
+  
   function wrappedClickHandler(event) {
     handleClickOutside(event);
   }
+
+  // This part needs to be refactored
+  let levels = [];
+  let dropdownWidth = 'auto';
+  let schema = [];
 
   function setSchema(value) {
     schema = value;
@@ -55,6 +55,8 @@
 
     document.addEventListener("click", wrappedClickHandler);
   });
+  // -------------------------------
+
 
   onDestroy(() => {
     document.removeEventListener("click", wrappedClickHandler);
