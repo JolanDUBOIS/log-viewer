@@ -40,62 +40,60 @@
   const marginTop = numericHeight + 40 + 'px';
 </script>
 
-<div class="table-container">
-  <table style={`margin-top: ${marginTop};`}>
-    <thead>
-      <tr style={`position: sticky; top: ${headerHeight}; background: #fff; z-index: 1;`}>
-        {#each schema as filterKey}
-          <th style={`width: ${COLUMN_WIDTHS[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
-            {#if filterKey === 'levelname'}
-              <!-- Filter button for levelname -->
-              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
-                <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
-              </FilterDropdown>
-            {:else if filterKey === 'asctime'}
-              <!-- Filter button for asctime -->
-              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
-                <AsctimeFilterButton slot="dropdown-content"/>
-              </FilterDropdown>
-            {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
-              <!-- Filter button for filename, funcName, and message -->
-              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
-                <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
-              </FilterDropdown>
-            {:else}
-              <!-- Placeholder button for other fields -->
-              <button disabled style="opacity: 0.5;">{columnLayoutConfig[filterKey].alias}</button>
-            {/if}
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div 
-              style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
-              on:mousedown={(event) => handleMouseDown(event, filterKey)}
-            ></div>
-          </th>
-        {/each}
+<table style={`margin-top: ${marginTop};`}>
+  <thead>
+    <tr style={`position: sticky; top: ${headerHeight}; background: #fff; z-index: 1;`}>
+      {#each schema as filterKey}
+        <th style={`width: ${COLUMN_WIDTHS[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
+          {#if filterKey === 'levelname'}
+            <!-- Filter button for levelname -->
+            <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
+              <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
+            </FilterDropdown>
+          {:else if filterKey === 'asctime'}
+            <!-- Filter button for asctime -->
+            <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
+              <AsctimeFilterButton slot="dropdown-content"/>
+            </FilterDropdown>
+          {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
+            <!-- Filter button for filename, funcName, and message -->
+            <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
+              <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
+            </FilterDropdown>
+          {:else}
+            <!-- Placeholder button for other fields -->
+            <button disabled style="opacity: 0.5;">{columnLayoutConfig[filterKey].alias}</button>
+          {/if}
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
+          <div 
+            style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
+            on:mousedown={(event) => handleMouseDown(event, filterKey)}
+          ></div>
+        </th>
+      {/each}
+    </tr>
+  </thead>
+  <tbody>
+    {#if $displayedLogs.length === 0}
+      <tr>
+        <td colspan="{Object.keys($displayedLogs[0] || $logs[0] || {}).length}" style="text-align: center;">
+          No rows match the filters.
+        </td>
       </tr>
-    </thead>
-    <tbody>
-      {#if $displayedLogs.length === 0}
+    {:else}
+      {#each $displayedLogs as log}
         <tr>
-          <td colspan="{Object.keys($displayedLogs[0] || $logs[0] || {}).length}" style="text-align: center;">
-            No rows match the filters.
-          </td>
+          {#each schema as key}
+            <TableCell 
+              width={COLUMN_WIDTHS[key] || 'auto'} 
+              value={log[key]}
+            ></TableCell>
+          {/each}
         </tr>
-      {:else}
-        {#each $displayedLogs as log}
-          <tr>
-            {#each schema as key}
-              <TableCell 
-                width={COLUMN_WIDTHS[key] || 'auto'} 
-                value={log[key]}
-              ></TableCell>
-            {/each}
-          </tr>
-        {/each}
-      {/if}
-    </tbody>
-  </table>
-</div>
+      {/each}
+    {/if}
+  </tbody>
+</table>
 
 <style>
 

@@ -73,10 +73,12 @@
     <SidePanel />
   {/if}
 
-  <LogTable 
-    schema={schema} 
-    levels={levels} 
-  />
+  <div class="table-container">
+    <LogTable 
+      schema={schema} 
+      levels={levels} 
+    />
+  </div>
 </div>
 
 <ActiveCellPopup />
@@ -86,5 +88,7 @@
     margin-left: 0px;
     margin-right: 0px;
     padding: 0; /* Remove any padding from the app container */
+    display: flex;
+    flex-direction: column;
   }
 </style>

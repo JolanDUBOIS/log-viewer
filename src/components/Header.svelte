@@ -45,19 +45,20 @@
 
 <style>
   .header-bar {
+    height: var(--header-height);
+    flex-shrink: 0;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    background-color: #eee;
-    border-bottom: 1px solid #ccc;
-    line-height: var(--header-height);
+    right: 0;
     z-index: 100;
+    background: #eee;
+    border-bottom: 1px solid #ccc;
     display: flex;
     align-items: center;
     padding: 0 1rem;
-    box-sizing: border-box; /* Ensure padding is included in the width */
-    overflow: hidden; /* Prevent content from overflowing */
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .left-section {
