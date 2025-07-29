@@ -1,6 +1,7 @@
 <script>
   import { headerHeight } from '../constants.js';
   import { columnsShown } from '../stores/logStore.js';
+  import { isSidePanelOpen } from '../stores/uiStore.js';
 
   function toggleVisibility(key) {
     columnsShown.update(current => {
@@ -8,9 +9,18 @@
       return current;
     });
   }
+
+  function closeSidePanel() {
+    isSidePanelOpen.set(false);
+  }
 </script>
 
-<div class="side-panel" style={`--header-height: ${headerHeight}`}>
+<div 
+  class="side-panel" 
+  style={`--header-height: ${headerHeight}`} 
+  on:mouseleave={closeSidePanel}
+  role="complementary" 
+>
   <h3>Columns</h3>
   <div class="columns-list">
     {#each Object.keys($columnsShown) as key}
@@ -32,7 +42,7 @@
     </div>
     {/each}
   </div>
-  <!-- <h3>Side Panel (ideas)</h3>
+<!-- <h3>Side Panel (ideas)</h3>
   <p>Here we add the possibility for the user to rename columns, to define which will be shown and which will not... Potentially also define which type of columns they are (time, text, number, level/select type) though it would be nice to have it automated...</p>
   <p>Other settings (dark mode, toggle color for level, etc.)</p> -->
 </div>
