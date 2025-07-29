@@ -66,49 +66,25 @@
   });
 </script>
 
-<div class="app-container">
+<Header />
+
+<div class="main-content">
   {#if $isSidePanelOpen}
     <SidePanel />
   {/if}
 
-  <div class="main-content">
-
-    <Header />
-
-    <LogTable 
-      schema={schema} 
-      levels={levels} 
-    />
-
-    <ActiveCellPopup />
-  
-  </div>
-
+  <LogTable 
+    schema={schema} 
+    levels={levels} 
+  />
 </div>
 
-<style>
-  :global(html), :global(body) {
-    margin: 0;
-    padding: 0;
-  }
+<ActiveCellPopup />
 
+<style>
   :global(#app) {
     margin-left: 0px;
     margin-right: 0px;
     padding: 0; /* Remove any padding from the app container */
-  }
-
-  .app-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-  }
-
-  .main-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;    /* enable vertical scroll */
-    height: 100vh;       /* or 100% if parent allows */
   }
 </style>
