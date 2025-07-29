@@ -1,5 +1,5 @@
 <script>
-  import { logs, displayedLogs, columnWidths } from '../../stores/logStore.js';
+  import { logs, displayedLogs, columnWidths, columnsShown } from '../../stores/logStore.js';
   import { headerFontSize, headerHeight, columnLayoutConfig } from '../../constants.js';
   import TableCell from './TableCell.svelte';
   import LevelnameFilterButton from './LevelnameFilterButton.svelte';
@@ -47,32 +47,34 @@
   <thead>
     <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
       {#each schema as filterKey}
+      {#if $columnsShown[filterKey]}
         <th style={`width: ${$columnWidths[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
-          {#if filterKey === 'levelname'}
-            <!-- Filter button for levelname -->
-            <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
-              <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
-            </FilterDropdown>
-          {:else if filterKey === 'asctime'}
-            <!-- Filter button for asctime -->
-            <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
-              <AsctimeFilterButton slot="dropdown-content"/>
-            </FilterDropdown>
-          {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
-            <!-- Filter button for filename, funcName, and message -->
-            <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
-              <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
-            </FilterDropdown>
-          {:else}
-            <!-- Placeholder button for other fields -->
-            <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{columnLayoutConfig[filterKey].alias}</button>
-          {/if}
-          <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <div 
-            style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
-            on:mousedown={(event) => handleMouseDown(event, filterKey)}
-          ></div>
-        </th>
+            {#if filterKey === 'levelname'}
+              <!-- Filter button for levelname -->
+              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
+                <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
+              </FilterDropdown>
+            {:else if filterKey === 'asctime'}
+              <!-- Filter button for asctime -->
+              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
+                <AsctimeFilterButton slot="dropdown-content"/>
+              </FilterDropdown>
+            {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
+              <!-- Filter button for filename, funcName, and message -->
+              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
+                <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
+              </FilterDropdown>
+              {:else}
+              <!-- Placeholder button for other fields -->
+              <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{columnLayoutConfig[filterKey].alias}</button>
+              {/if}
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <div 
+              style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
+              on:mousedown={(event) => handleMouseDown(event, filterKey)}
+              ></div>
+          </th>
+        {/if}
       {/each}
     </tr>
   </thead>
@@ -87,10 +89,12 @@
       {#each $displayedLogs as log}
         <tr>
           {#each schema as key}
+            {#if $columnsShown[key]}
             <TableCell 
               width={$columnWidths[key] || 'auto'} 
               value={log[key]}
             ></TableCell>
+            {/if}
           {/each}
         </tr>
       {/each}
