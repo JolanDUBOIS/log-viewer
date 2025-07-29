@@ -1,12 +1,16 @@
-<div class="side-panel">
+<script>
+  import { headerHeight } from '../constants.js';
+</script>
+
+<div class="side-panel" style={`--header-height: ${headerHeight}`}>
   <h2>Side Panel</h2>
   <p>Settings or filters go here...</p>
 </div>
 
 <style>
   .side-panel {
-    position: absolute; /* Changed from fixed to absolute */
-    top: 0;
+    position: absolute;
+    top: var(--header-height, 0); /* Use --header-height variable */
     left: 0;
     width: var(--panel-width, 280px); /* default width */
     height: 100%; /* Adjusted to fit within parent container */
