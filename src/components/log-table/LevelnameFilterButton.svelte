@@ -1,5 +1,5 @@
 <script>
-	import { selectedLevels } from '../stores/logStore.js';
+	import { selectedLevels } from '../../stores/logStore.js';
 	export let levels;
 
 	function toggleLevel(level) {
