@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import open from 'open';
+// import open from 'open';
 import { loadUserConfig, saveUserConfig } from './configManager.js';
 import cors from 'cors';
 
@@ -43,7 +43,7 @@ app.get('/api/log', (req, res) => {
   });
 });
 
-// Load or create config on server start
+// Load or create user config on server start
 let userConfig = loadUserConfig();
 
 // Get current config
@@ -56,6 +56,19 @@ app.post('/api/user-config', express.json(), (req, res) => {
   userConfig = req.body;
   saveUserConfig(userConfig);
   res.sendStatus(204);
+});
+
+// Load or create session parameters
+let sessionColumnFilters = {};  // For now, the session parameters are only composed of column filters
+
+// Get current session parameters
+app.get('/api/session-params', (req, res) => {
+  res.json(sessionColumnFilters);
+});
+
+// Update session parameters (no save logic here)
+app.post('/api/session-params', express.json(), (req, res) => {
+  sessionColumnFilters = req.body;
 });
 
 // ---------- SERVER LAUNCH ----------
