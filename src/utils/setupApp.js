@@ -35,24 +35,32 @@ function initializeColumnWidths(logs) {
   columnWidths.set(newWidths);
 }
 
-function initializeUserConfig(logs) {
+function initializeUserConfig() {
   console.log('Initializing userConfig...');
-  if (!logs || logs.length === 0) return;
-
   const columns = get(logColumns);
 
   userConfig.update(config => {
     const updatedConfig = { ...config };
 
-    if (!updatedConfig.columnsAlias) updatedConfig.columnsAlias = {};
-    if (!updatedConfig.columnsShown) updatedConfig.columnsShown = {};
-
     for (const col of columns) {
-      if (!(col in updatedConfig.columnsAlias)) {
-        updatedConfig.columnsAlias[col] = col;
-      }
-      if (!(col in updatedConfig.columnsShown)) {
-        updatedConfig.columnsShown[col] = true;
+      console.log(`Processing column: ${col}`);
+      if (!(col in updatedConfig)) {
+        updatedConfig[col] = {
+          alias: col,
+          shown: true,
+          orderBy: false
+        };
+      } else {
+        // Fill in missing fields if the column already exists
+        if (!('alias' in updatedConfig[col])) {
+          updatedConfig[col].alias = col;
+        }
+        if (!('shown' in updatedConfig[col])) {
+          updatedConfig[col].shown = true;
+        }
+        if (!('orderBy' in updatedConfig[col])) {
+          updatedConfig[col].orderBy = false;
+        }
       }
     }
 
@@ -87,5 +95,5 @@ export async function initializeLogs({ setDropdownWidth }) {
   setDropdownWidth(`${Math.max(...levelsArray.map(level => level.length))}rem`);
 
   initializeColumnWidths(parsedLogs);
-  initializeUserConfig(parsedLogs);
+  initializeUserConfig();
 }

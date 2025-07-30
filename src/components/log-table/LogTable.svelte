@@ -44,33 +44,33 @@
 <table style={`margin-top: ${marginTop};`}>
   <thead>
     <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
-      {#each $logColumns as filterKey}
-      {#if $userConfig.columnsShown[filterKey]}
-        <th style={`width: ${$columnWidths[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
-            {#if filterKey === 'levelname'}
+      {#each Object.keys($userConfig) as colKey}
+        {#if $userConfig[colKey].shown}
+          <th style={`width: ${$columnWidths[colKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
+            {#if colKey === 'levelname'}
               <!-- Filter button for levelname -->
-              <FilterDropdown filterKey={filterKey} filterName={$userConfig.columnsAlias[filterKey]}>
+              <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
                 <LevelnameFilterButton slot="dropdown-content" levels={$levels}/>
               </FilterDropdown>
-            {:else if filterKey === 'asctime'}
+            {:else if colKey === 'asctime'}
               <!-- Filter button for asctime -->
-              <FilterDropdown filterKey={filterKey} filterName={$userConfig.columnsAlias[filterKey]}>
+              <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
                 <AsctimeFilterButton slot="dropdown-content"/>
               </FilterDropdown>
-            {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
+            {:else if ['filename', 'funcName', 'message', 'name'].includes(colKey)}
               <!-- Filter button for filename, funcName, and message -->
-              <FilterDropdown filterKey={filterKey} filterName={$userConfig.columnsAlias[filterKey]}>
-                <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
+              <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
+                <TextFilterButton slot="dropdown-content" filterKey={colKey}/>
               </FilterDropdown>
-              {:else}
-              <!-- Placeholder button for other fields -->
-              <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{$userConfig.columnsAlias[filterKey]}</button>
-              {/if}
-              <!-- svelte-ignore a11y_no_static_element_interactions -->
-              <div 
-              style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
-              on:mousedown={(event) => handleMouseDown(event, filterKey)}
-              ></div>
+            {:else}
+            <!-- Placeholder button for other fields -->
+            <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{$userConfig[colKey].alias}</button>
+            {/if}
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <div 
+            style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
+            on:mousedown={(event) => handleMouseDown(event, colKey)}
+            ></div>
           </th>
         {/if}
       {/each}
@@ -86,11 +86,11 @@
     {:else}
       {#each $displayedLogs as log}
         <tr>
-          {#each $logColumns as filterKey}
-            {#if $userConfig.columnsShown[filterKey]}
+          {#each Object.keys($userConfig) as colKey}
+            {#if $userConfig[colKey].shown}
             <TableCell 
-              width={$columnWidths[filterKey] || 'auto'} 
-              value={log[filterKey]}
+              width={$columnWidths[colKey] || 'auto'} 
+              value={log[colKey]}
             ></TableCell>
             {/if}
           {/each}

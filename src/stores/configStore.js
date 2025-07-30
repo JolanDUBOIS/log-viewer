@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
 
-export const userConfig = writable(null);
+export const userConfig = writable({});
 
 export async function loadUserConfig() {
   try {
@@ -21,12 +21,19 @@ export async function loadUserConfig() {
   }
 }
 
-export async function saveUserConfig() {
+export async function updateAndSaveUserConfig(newUserConfig) {
+  // Merge newUserConfig into the existing userConfig store
   const currentConfig = get(userConfig);
+  const updatedConfig = { ...currentConfig, ...newUserConfig };
+
+  // Update the store immediately
+  userConfig.set(updatedConfig);
+
+  // Save to backend
   const res = await fetch('/api/user-config', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(currentConfig)
+    body: JSON.stringify(updatedConfig),
   });
 
   if (!res.ok) {
