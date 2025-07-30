@@ -51,7 +51,8 @@ function initializeColumnsShown(logs) {
 }
 
 export async function initializeLogs({ setLevels, setDropdownWidth, setSchema }) {
-  const res = await fetch('/api/log');
+  // const res = await fetch('/api/log');
+  const res = await fetch(`/api/load-log?path=./local-tests/log.json`);
   if (!res.ok) throw new Error('Failed to fetch log file');
 
   const text = await res.text();
