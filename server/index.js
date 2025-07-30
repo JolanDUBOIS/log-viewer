@@ -26,9 +26,6 @@ if (!logFilePath || !fs.existsSync(logFilePath)) {
   process.exit(1);
 }
 
-// Load or create config on server start
-let userConfig = loadUserConfig();
-
 // ---------- STATIC FRONTEND ----------
 const frontendDir = path.join(__dirname, '../dist');
 app.use(express.static(frontendDir));
@@ -46,13 +43,16 @@ app.get('/api/log', (req, res) => {
   });
 });
 
+// Load or create config on server start
+let userConfig = loadUserConfig();
+
 // Get current config
-app.get('/api/config', (req, res) => {
+app.get('/api/user-config', (req, res) => {
   res.json(userConfig);
 });
 
 // Update config and save it
-app.post('/api/config', express.json(), (req, res) => {
+app.post('/api/user-config', express.json(), (req, res) => {
   userConfig = req.body;
   saveUserConfig(userConfig);
   res.sendStatus(204);

@@ -18,7 +18,7 @@
     sortOrder 
   } from './stores/logStore.js';
   import { isSidePanelOpen } from './stores/uiStore.js';
-  import { loadConfig } from './stores/configStore.js';
+  import { loadUserConfig } from './stores/configStore.js';
 
   // Component imports
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
@@ -49,7 +49,7 @@
   let dropdownWidth = 'auto';
 
   onMount(async () => {
-    await loadConfig();
+    await loadUserConfig();
     await initializeLogs({
       setDropdownWidth: dw => dropdownWidth = dw
     });

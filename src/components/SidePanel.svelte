@@ -1,7 +1,7 @@
 <script>
   import { headerHeight } from '../constants.js';
   import { isSidePanelOpen } from '../stores/uiStore.js';
-  import { userConfig, saveConfig } from '../stores/configStore.js';
+  import { userConfig, saveUserConfig } from '../stores/configStore.js';
 
   // function toggleVisibility(key) {
   //   columnsShown.update(current => {
@@ -16,7 +16,7 @@
       newConfig.columnsShown[columnKey] = !newConfig.columnsShown[columnKey];
       return newConfig;
     });
-    saveConfig();
+    saveUserConfig();
   }
 
   function closeSidePanel() {

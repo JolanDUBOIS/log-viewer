@@ -2,9 +2,9 @@ import { writable, get } from 'svelte/store';
 
 export const userConfig = writable(null);
 
-export async function loadConfig() {
+export async function loadUserConfig() {
   try {
-    const res = await fetch('/api/config');
+    const res = await fetch('/api/user-config');
     if (res.ok) {
       let configData = await res.json();
     
@@ -21,9 +21,9 @@ export async function loadConfig() {
   }
 }
 
-export async function saveConfig() {
+export async function saveUserConfig() {
   const currentConfig = get(userConfig);
-  const res = await fetch('/api/config', {
+  const res = await fetch('/api/user-config', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(currentConfig)
