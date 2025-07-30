@@ -1,6 +1,6 @@
 <script>
   import { logs, displayedLogs, columnWidths, columnsShown } from '../../stores/logStore.js';
-  import { headerFontSize, headerHeight, columnLayoutConfig } from '../../constants.js';
+  import { headerFontSize, headerHeight, columnsAlias } from '../../constants.js';
   import TableCell from './TableCell.svelte';
   import LevelnameFilterButton from './LevelnameFilterButton.svelte';
   import AsctimeFilterButton from './AsctimeFilterButton.svelte';
@@ -51,22 +51,22 @@
         <th style={`width: ${$columnWidths[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
             {#if filterKey === 'levelname'}
               <!-- Filter button for levelname -->
-              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
+              <FilterDropdown filterKey={filterKey} filterName={columnsAlias[filterKey]}>
                 <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
               </FilterDropdown>
             {:else if filterKey === 'asctime'}
               <!-- Filter button for asctime -->
-              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
+              <FilterDropdown filterKey={filterKey} filterName={columnsAlias[filterKey]}>
                 <AsctimeFilterButton slot="dropdown-content"/>
               </FilterDropdown>
             {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
               <!-- Filter button for filename, funcName, and message -->
-              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
+              <FilterDropdown filterKey={filterKey} filterName={columnsAlias[filterKey]}>
                 <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
               </FilterDropdown>
               {:else}
               <!-- Placeholder button for other fields -->
-              <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{columnLayoutConfig[filterKey].alias}</button>
+              <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{columnsAlias[filterKey]}</button>
               {/if}
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <div 
