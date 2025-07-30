@@ -1,5 +1,6 @@
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
-import { logs, filteredLogs, columnWidths, columnsShown, selectedLevels, filterDropdownState } from '../stores/logStore.js';
+import { logs, filteredLogs, columnWidths, selectedLevels, filterDropdownState } from '../stores/logStore.js';
+import { userConfig } from '../stores/configStore.js';
 
 function initializeColumnWidths(logs) {
   if (!logs || logs.length === 0) {
@@ -34,8 +35,12 @@ function initializeColumnWidths(logs) {
 }
 
 function initializeColumnsShown(logs) {
+  console.log('Initializing columnsShown...');
   if (!logs || logs.length === 0) {
-    columnsShown.set({}); // reset global store to empty object
+    userConfig.update(config => {
+      config.columnsShown = {}; // reset to empty object
+      return config;
+    });
     return;
   }
 
@@ -46,13 +51,18 @@ function initializeColumnsShown(logs) {
     newColumnsShown[column] = true; // initialize all columns to true
   }
 
-  // Update the writable store here
-  columnsShown.set(newColumnsShown);
+  // Update the userConfig store here
+  userConfig.update(config => {
+    return {
+      ...config,
+      columnsShown: newColumnsShown
+    };
+  });
 }
 
 export async function initializeLogs({ setLevels, setDropdownWidth, setSchema }) {
   // const res = await fetch('/api/log');
-  const res = await fetch(`/api/load-log?path=./local-tests/log.json`);
+  const res = await fetch('/api/log?path=./local-tests/log.json');
   if (!res.ok) throw new Error('Failed to fetch log file');
 
   const text = await res.text();

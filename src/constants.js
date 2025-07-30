@@ -22,15 +22,3 @@ export const headerFontSize = '1rem'; // Font size for the top row
 export const cellFontSize = '0.9rem'; // Font size for the normal cells below
 
 export const headerHeight = '60px'; // Height of the header row
-
-
-export const columnsAlias = {
-  created: 'Created',
-  asctime: 'Time',
-  levelname: 'Level',
-  name: 'Logger',
-  filename: 'File',
-  lineno: 'Line',
-  funcName: 'Func',
-  message: 'Message',
-}

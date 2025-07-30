@@ -1,11 +1,12 @@
 <script>
-  import { logs, displayedLogs, columnWidths, columnsShown } from '../../stores/logStore.js';
-  import { headerFontSize, headerHeight, columnsAlias } from '../../constants.js';
+  import { logs, displayedLogs, columnWidths } from '../../stores/logStore.js';
+  import { headerFontSize, headerHeight } from '../../constants.js';
   import TableCell from './TableCell.svelte';
   import LevelnameFilterButton from './LevelnameFilterButton.svelte';
   import AsctimeFilterButton from './AsctimeFilterButton.svelte';
   import TextFilterButton from './TextFilterButton.svelte';
   import FilterDropdown from './FilterDropdown.svelte';
+  import { userConfig } from '../../stores/configStore.js';
 
   let resizingColumn = null;
   let startX = 0;
@@ -47,26 +48,26 @@
   <thead>
     <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
       {#each schema as filterKey}
-      {#if $columnsShown[filterKey]}
+      {#if $userConfig.columnsShown[filterKey]}
         <th style={`width: ${$columnWidths[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
             {#if filterKey === 'levelname'}
               <!-- Filter button for levelname -->
-              <FilterDropdown filterKey={filterKey} filterName={columnsAlias[filterKey]}>
+              <FilterDropdown filterKey={filterKey} filterName={$userConfig.columnsAlias[filterKey]}>
                 <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
               </FilterDropdown>
             {:else if filterKey === 'asctime'}
               <!-- Filter button for asctime -->
-              <FilterDropdown filterKey={filterKey} filterName={columnsAlias[filterKey]}>
+              <FilterDropdown filterKey={filterKey} filterName={$userConfig.columnsAlias[filterKey]}>
                 <AsctimeFilterButton slot="dropdown-content"/>
               </FilterDropdown>
             {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
               <!-- Filter button for filename, funcName, and message -->
-              <FilterDropdown filterKey={filterKey} filterName={columnsAlias[filterKey]}>
+              <FilterDropdown filterKey={filterKey} filterName={$userConfig.columnsAlias[filterKey]}>
                 <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
               </FilterDropdown>
               {:else}
               <!-- Placeholder button for other fields -->
-              <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{columnsAlias[filterKey]}</button>
+              <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{$userConfig.columnsAlias[filterKey]}</button>
               {/if}
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <div 
@@ -88,11 +89,11 @@
     {:else}
       {#each $displayedLogs as log}
         <tr>
-          {#each schema as key}
-            {#if $columnsShown[key]}
+          {#each schema as filterKey}
+            {#if $userConfig.columnsShown[filterKey]}
             <TableCell 
-              width={$columnWidths[key] || 'auto'} 
-              value={log[key]}
+              width={$columnWidths[filterKey] || 'auto'} 
+              value={log[filterKey]}
             ></TableCell>
             {/if}
           {/each}
