@@ -19,6 +19,7 @@ export async function loadSessionParams() {
 
 export async function updateSessionParams(newSessionParams) {
   // Update the store immediately
+  console.log('Updating session parameters:', newSessionParams);
   sessionColumnFilters.set(newSessionParams);
 
   // Save to backend

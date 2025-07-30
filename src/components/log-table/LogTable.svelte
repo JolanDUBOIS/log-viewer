@@ -1,9 +1,9 @@
 <script>
-  import { logs, displayedLogs, columnWidths, levels } from '../../stores/logStore.js';
+  import { logs, displayedLogs, columnWidths } from '../../stores/logStore.js';
   import { headerFontSize, headerHeight } from '../../constants.js';
   import TableCell from './TableCell.svelte';
-  import LevelnameFilterButton from './LevelnameFilterButton.svelte';
-  import AsctimeFilterButton from './AsctimeFilterButton.svelte';
+  import CategoryFilterButton from './CategoryFilterButton.svelte';
+  import DatetimeFilterButton from './DatetimeFilterButton.svelte';
   import TextFilterButton from './TextFilterButton.svelte';
   import FilterDropdown from './FilterDropdown.svelte';
   import { userConfig } from '../../stores/configStore.js';
@@ -47,17 +47,17 @@
       {#each Object.keys($userConfig) as colKey}
         {#if $userConfig[colKey].shown}
           <th style={`width: ${$columnWidths[colKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
-            {#if colKey === 'levelname'}
+            {#if $userConfig[colKey].type === 'category'}
               <!-- Filter button for levelname -->
               <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
-                <LevelnameFilterButton slot="dropdown-content" levels={$levels}/>
+                <CategoryFilterButton slot="dropdown-content" filterKey={colKey}/>
               </FilterDropdown>
-            {:else if colKey === 'asctime'}
+            {:else if $userConfig[colKey].type === 'datetime'}
               <!-- Filter button for asctime -->
               <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
-                <AsctimeFilterButton slot="dropdown-content"/>
+                <DatetimeFilterButton slot="dropdown-content" filterKey={colKey}/>
               </FilterDropdown>
-            {:else if ['filename', 'funcName', 'message', 'name'].includes(colKey)}
+            {:else if $userConfig[colKey].type === 'text'}
               <!-- Filter button for filename, funcName, and message -->
               <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
                 <TextFilterButton slot="dropdown-content" filterKey={colKey}/>

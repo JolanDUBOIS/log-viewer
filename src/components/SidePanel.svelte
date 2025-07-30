@@ -3,6 +3,7 @@
   import { headerHeight } from '../constants.js';
   import { isSidePanelOpen } from '../stores/uiStore.js';
   import { userConfig, updateAndSaveUserConfig } from '../stores/configStore.js';
+  import { sessionColumnFilters } from '../stores/sessionStore.js';
 
   function toggleVisibility(columnKey) {
     const currentConfig = get(userConfig);

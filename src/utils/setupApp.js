@@ -1,7 +1,7 @@
-import { get } from 'svelte/store';
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
-import { logs, filteredLogs, columnWidths, selectedLevels, filterDropdownState, levels } from '../stores/logStore.js';
+import { logs, filteredLogs, columnWidths, filterDropdownState } from '../stores/logStore.js';
 import { userConfig } from '../stores/configStore.js';
+import { initializeSessionParams } from './sessionHelpers.js';
 
 function initializeColumnWidths(logs) {
   if (!logs || logs.length === 0) {
@@ -89,13 +89,12 @@ export async function initializeLogs({ setDropdownWidth }) {
   const logColSchema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
 
   const listLevels = [...new Set(parsedLogs.map(log => log.levelname))];
-  selectedLevels.set(new Set(listLevels));
-  levels.set(listLevels);
+  // selectedLevels.set(new Set(listLevels));
 
   filterDropdownState.set(Object.fromEntries(logColSchema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
-  const levelsArray = get(levels);
-  setDropdownWidth(`${Math.max(...levelsArray.map(level => level.length))}rem`);
+  setDropdownWidth(`${Math.max(...listLevels.map(level => level.length))}rem`);
 
   initializeColumnWidths(parsedLogs);
-  initializeUserConfig();
+  initializeUserConfig(parsedLogs);
+  await initializeSessionParams(parsedLogs);
 }

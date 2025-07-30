@@ -12,13 +12,11 @@
     logs,
     filteredLogs,
     displayedLogs,
-    selectedLevels,
-    textFilters,
-    asctimeFilter,
     sortOrder 
   } from './stores/logStore.js';
   import { isSidePanelOpen } from './stores/uiStore.js';
-  import { loadUserConfig } from './stores/configStore.js';
+  import { loadUserConfig, userConfig } from './stores/configStore.js';
+  import { loadSessionParams, sessionColumnFilters } from './stores/sessionStore.js';
 
   // Component imports
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
@@ -28,9 +26,8 @@
 
   $: {
     const result = applyAllFilters($logs, {
-      selectedLevels: $selectedLevels,
-      textFilters: $textFilters,
-      asctimeFilter: $asctimeFilter
+      sessionColumnFilters: $sessionColumnFilters,
+      userConfig: $userConfig,
     });
 
     filteredLogs.set(result);
@@ -50,6 +47,7 @@
 
   onMount(async () => {
     await loadUserConfig();
+    await loadSessionParams();
     await initializeLogs({
       setDropdownWidth: dw => dropdownWidth = dw
     });
