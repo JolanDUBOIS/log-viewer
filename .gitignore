@@ -35,3 +35,6 @@ dist-ssr/
 
 # Local test data
 local-tests/
+
+# Config files
+config/user.config.json
