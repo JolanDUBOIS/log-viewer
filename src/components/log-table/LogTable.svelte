@@ -1,5 +1,5 @@
 <script>
-  import { logs, displayedLogs, columnWidths } from '../../stores/logStore.js';
+  import { logs, displayedLogs, logColumns, columnWidths, levels } from '../../stores/logStore.js';
   import { headerFontSize, headerHeight } from '../../constants.js';
   import TableCell from './TableCell.svelte';
   import LevelnameFilterButton from './LevelnameFilterButton.svelte';
@@ -36,9 +36,6 @@
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
   }
-
-  export let schema = [];
-  export let levels = [];
   
   const numericHeight = parseInt(headerHeight, 10);
   const marginTop = numericHeight + 40 + 'px';
@@ -47,13 +44,13 @@
 <table style={`margin-top: ${marginTop};`}>
   <thead>
     <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
-      {#each schema as filterKey}
+      {#each $logColumns as filterKey}
       {#if $userConfig.columnsShown[filterKey]}
         <th style={`width: ${$columnWidths[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
             {#if filterKey === 'levelname'}
               <!-- Filter button for levelname -->
               <FilterDropdown filterKey={filterKey} filterName={$userConfig.columnsAlias[filterKey]}>
-                <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
+                <LevelnameFilterButton slot="dropdown-content" levels={$levels}/>
               </FilterDropdown>
             {:else if filterKey === 'asctime'}
               <!-- Filter button for asctime -->
@@ -89,7 +86,7 @@
     {:else}
       {#each $displayedLogs as log}
         <tr>
-          {#each schema as filterKey}
+          {#each $logColumns as filterKey}
             {#if $userConfig.columnsShown[filterKey]}
             <TableCell 
               width={$columnWidths[filterKey] || 'auto'} 

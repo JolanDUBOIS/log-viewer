@@ -1,5 +1,6 @@
+import { get } from 'svelte/store';
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
-import { logs, filteredLogs, columnWidths, selectedLevels, filterDropdownState } from '../stores/logStore.js';
+import { logs, filteredLogs, logColumns, columnWidths, selectedLevels, filterDropdownState, levels } from '../stores/logStore.js';
 import { userConfig } from '../stores/configStore.js';
 
 function initializeColumnWidths(logs) {
@@ -34,33 +35,32 @@ function initializeColumnWidths(logs) {
   columnWidths.set(newWidths);
 }
 
-function initializeColumnsShown(logs) {
-  console.log('Initializing columnsShown...');
-  if (!logs || logs.length === 0) {
-    userConfig.update(config => {
-      config.columnsShown = {}; // reset to empty object
-      return config;
-    });
-    return;
-  }
+function initializeUserConfig(logs) {
+  console.log('Initializing userConfig...');
+  if (!logs || logs.length === 0) return;
 
-  const firstRow = logs[0];
-  const newColumnsShown = {};
+  const columns = get(logColumns);
 
-  for (const column of Object.keys(firstRow)) {
-    newColumnsShown[column] = true; // initialize all columns to true
-  }
-
-  // Update the userConfig store here
   userConfig.update(config => {
-    return {
-      ...config,
-      columnsShown: newColumnsShown
-    };
+    const updatedConfig = { ...config };
+
+    if (!updatedConfig.columnsAlias) updatedConfig.columnsAlias = {};
+    if (!updatedConfig.columnsShown) updatedConfig.columnsShown = {};
+
+    for (const col of columns) {
+      if (!(col in updatedConfig.columnsAlias)) {
+        updatedConfig.columnsAlias[col] = col;
+      }
+      if (!(col in updatedConfig.columnsShown)) {
+        updatedConfig.columnsShown[col] = true;
+      }
+    }
+
+    return updatedConfig;
   });
 }
 
-export async function initializeLogs({ setLevels, setDropdownWidth, setSchema }) {
+export async function initializeLogs({ setDropdownWidth }) {
   // const res = await fetch('/api/log');
   const res = await fetch('/api/log?path=./local-tests/log.json');
   if (!res.ok) throw new Error('Failed to fetch log file');
@@ -75,16 +75,17 @@ export async function initializeLogs({ setLevels, setDropdownWidth, setSchema })
   logs.set(parsedLogs);
   filteredLogs.set(parsedLogs);
 
-  const schema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
-  setSchema(schema); // <-- store it in a `let schema = []` in App.svelte
+  const logColSchema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
+  logColumns.set(logColSchema);
 
-  const levels = [...new Set(parsedLogs.map(log => log.levelname))];
-  selectedLevels.set(new Set(levels));
-  setLevels(levels);
+  const listLevels = [...new Set(parsedLogs.map(log => log.levelname))];
+  selectedLevels.set(new Set(listLevels));
+  levels.set(listLevels);
 
-  filterDropdownState.set(Object.fromEntries(schema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
-  setDropdownWidth(`${Math.max(...levels.map(level => level.length))}rem`);
+  filterDropdownState.set(Object.fromEntries(logColSchema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
+  const levelsArray = get(levels);
+  setDropdownWidth(`${Math.max(...levelsArray.map(level => level.length))}rem`);
 
   initializeColumnWidths(parsedLogs);
-  initializeColumnsShown(parsedLogs);
+  initializeUserConfig(parsedLogs);
 }

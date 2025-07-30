@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 
 export const userConfig = writable(null);
 
@@ -21,16 +21,15 @@ export async function loadConfig() {
   }
 }
 
-export async function saveConfig(newConfig) {
+export async function saveConfig() {
+  const currentConfig = get(userConfig);
   const res = await fetch('/api/config', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newConfig)
+    body: JSON.stringify(currentConfig)
   });
 
-  if (res.ok) {
-    userConfig.set(newConfig);
-  } else {
+  if (!res.ok) {
     console.error('Failed to save config');
   }
 }

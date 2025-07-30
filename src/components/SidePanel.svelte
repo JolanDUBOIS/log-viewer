@@ -14,9 +14,9 @@
     userConfig.update(config => {
       const newConfig = { ...config, columnsShown: { ...config.columnsShown } };
       newConfig.columnsShown[columnKey] = !newConfig.columnsShown[columnKey];
-      saveConfig(newConfig);
       return newConfig;
     });
+    saveConfig();
   }
 
   function closeSidePanel() {

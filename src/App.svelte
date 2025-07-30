@@ -46,20 +46,12 @@
   }
 
   // This part needs to be refactored
-  let levels = [];
   let dropdownWidth = 'auto';
-  let schema = [];
-
-  function setSchema(value) {
-    schema = value;
-  }
 
   onMount(async () => {
     await loadConfig();
     await initializeLogs({
-      setLevels: l => levels = l,
-      setDropdownWidth: dw => dropdownWidth = dw,
-      setSchema
+      setDropdownWidth: dw => dropdownWidth = dw
     });
     document.addEventListener("click", wrappedClickHandler);
   });
@@ -79,10 +71,7 @@
   {/if}
 
   <div class="table-container">
-    <LogTable 
-      schema={schema} 
-      levels={levels} 
-    />
+    <LogTable />
   </div>
 </div>
 
