@@ -50,12 +50,10 @@ function initializeColumnsShown(logs) {
   columnsShown.set(newColumnsShown);
 }
 
-export async function initializeLogs({
-  setLevels,
-  setDropdownWidth,
-  setSchema
-}) {
-  const res = await fetch('/log.json');
+export async function initializeLogs({ setLevels, setDropdownWidth, setSchema }) {
+  const res = await fetch('/api/log');
+  if (!res.ok) throw new Error('Failed to fetch log file');
+
   const text = await res.text();
 
   const parsedLogs = text
@@ -66,7 +64,6 @@ export async function initializeLogs({
   logs.set(parsedLogs);
   filteredLogs.set(parsedLogs);
 
-  // Extract and set schema safely
   const schema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
   setSchema(schema); // <-- store it in a `let schema = []` in App.svelte
 
@@ -74,10 +71,7 @@ export async function initializeLogs({
   selectedLevels.set(new Set(levels));
   setLevels(levels);
 
-  // Initialize filterDropdownState for each level
   filterDropdownState.set(Object.fromEntries(schema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
-
-  // Dropdown width based on longest level name
   setDropdownWidth(`${Math.max(...levels.map(level => level.length))}rem`);
 
   initializeColumnWidths(parsedLogs);
