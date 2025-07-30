@@ -1,9 +1,6 @@
 import { writable } from 'svelte/store';
 
-export const logColumns = writable([]); // Array of log columns
-
 export const columnWidths = writable({}); // Object to store column widths
-// export const columnsShown = writable({}); // Object to track which columns are shown
 
 export const logs = writable([]); // Array of all logs
 export const filteredLogs = writable([]); // Array of filtered logs

@@ -1,5 +1,5 @@
 <script>
-  import { logs, displayedLogs, logColumns, columnWidths, levels } from '../../stores/logStore.js';
+  import { logs, displayedLogs, columnWidths, levels } from '../../stores/logStore.js';
   import { headerFontSize, headerHeight } from '../../constants.js';
   import TableCell from './TableCell.svelte';
   import LevelnameFilterButton from './LevelnameFilterButton.svelte';

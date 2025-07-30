@@ -1,6 +1,6 @@
-import { writable, get } from 'svelte/store';
+import { writable } from 'svelte/store';
 
-export const userConfig = writable({});
+export const userConfig = writable({}); // Contains for each column: alias, shown, orderBy, type
 
 export async function loadUserConfig() {
   try {
@@ -22,18 +22,13 @@ export async function loadUserConfig() {
 }
 
 export async function updateAndSaveUserConfig(newUserConfig) {
-  // Merge newUserConfig into the existing userConfig store
-  const currentConfig = get(userConfig);
-  const updatedConfig = { ...currentConfig, ...newUserConfig };
-
-  // Update the store immediately
-  userConfig.set(updatedConfig);
+  userConfig.set(newUserConfig);
 
   // Save to backend
   const res = await fetch('/api/user-config', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updatedConfig),
+    body: JSON.stringify(newUserConfig),
   });
 
   if (!res.ok) {

@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
-import { logs, filteredLogs, logColumns, columnWidths, selectedLevels, filterDropdownState, levels } from '../stores/logStore.js';
+import { logs, filteredLogs, columnWidths, selectedLevels, filterDropdownState, levels } from '../stores/logStore.js';
 import { userConfig } from '../stores/configStore.js';
 
 function initializeColumnWidths(logs) {
@@ -21,7 +21,7 @@ function initializeColumnWidths(logs) {
 
     console.log(`Column: ${column}, Max Content Length: ${maxContentLength}`);
 
-    const estimatedWidth = maxContentLength * 8;
+    const estimatedWidth = maxContentLength * 8 + 20;  // Doesn't work very well, too large for Time, too small for Levelname... (TODO: improve this)
 
     const finalWidth = Math.min(
       COLUMN_SIZE_LIMITS.width.maxCreation,
@@ -35,20 +35,20 @@ function initializeColumnWidths(logs) {
   columnWidths.set(newWidths);
 }
 
-function initializeUserConfig() {
+function initializeUserConfig(logs) {
   console.log('Initializing userConfig...');
-  const columns = get(logColumns);
+  const columns = logs.length > 0 ? Object.keys(logs[0]) : [];
 
   userConfig.update(config => {
     const updatedConfig = { ...config };
 
     for (const col of columns) {
-      console.log(`Processing column: ${col}`);
       if (!(col in updatedConfig)) {
         updatedConfig[col] = {
           alias: col,
           shown: true,
-          orderBy: false
+          orderBy: false,
+          type: 'text'
         };
       } else {
         // Fill in missing fields if the column already exists
@@ -60,6 +60,9 @@ function initializeUserConfig() {
         }
         if (!('orderBy' in updatedConfig[col])) {
           updatedConfig[col].orderBy = false;
+        }
+        if (!('type' in updatedConfig[col])) {
+          updatedConfig[col].type = 'text';
         }
       }
     }
@@ -84,7 +87,6 @@ export async function initializeLogs({ setDropdownWidth }) {
   filteredLogs.set(parsedLogs);
 
   const logColSchema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
-  logColumns.set(logColSchema);
 
   const listLevels = [...new Set(parsedLogs.map(log => log.levelname))];
   selectedLevels.set(new Set(listLevels));

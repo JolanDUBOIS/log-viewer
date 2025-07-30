@@ -5,14 +5,15 @@
   import { userConfig, updateAndSaveUserConfig } from '../stores/configStore.js';
 
   function toggleVisibility(columnKey) {
-    const currentConfig = get(userConfig); // get current full config
-    const updatedPart = {
+    const currentConfig = get(userConfig);
+    const newUserConfig = {
+      ...currentConfig,
       [columnKey]: {
         ...currentConfig[columnKey],
         shown: !currentConfig[columnKey]?.shown
       }
     };
-    updateAndSaveUserConfig(updatedPart);
+    updateAndSaveUserConfig(newUserConfig);
   }
 
   function closeSidePanel() {
