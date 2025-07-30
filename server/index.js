@@ -3,12 +3,19 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import open from 'open';
+import { loadUserConfig, saveUserConfig } from './configManager.js';
+import cors from 'cors';
+
+console.log('Starting server...');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3000;
+const port = 3001;
+
+// Enable CORS
+app.use(cors());
 
 // ---------- CLI ARG PARSING ----------
 const cliArgs = process.argv.slice(2);
@@ -19,38 +26,40 @@ if (!logFilePath || !fs.existsSync(logFilePath)) {
   process.exit(1);
 }
 
+// Load or create config on server start
+let userConfig = loadUserConfig();
+
 // ---------- STATIC FRONTEND ----------
 const frontendDir = path.join(__dirname, '../dist');
 app.use(express.static(frontendDir));
 
 // ---------- API ----------
+
+// Log file endpoint
 app.get('/api/log', (req, res) => {
   fs.readFile(logFilePath, 'utf-8', (err, data) => {
     if (err) {
       res.status(500).send('Could not read log file.');
       return;
     }
-    res.type('text/plain').send(data); // send raw text to frontend
+    res.type('text/plain').send(data);
   });
 });
 
-const configPath = path.join(__dirname, 'config/user.config.json');
+// Get current config
 app.get('/api/config', (req, res) => {
-  if (!fs.existsSync(configPath)) {
-    return res.json({ recentFile: logFilePath });
-  }
-  const config = JSON.parse(fs.readFileSync(configPath));
-  res.json(config);
+  res.json(userConfig);
 });
 
-// Optional: save config
+// Update config and save it
 app.post('/api/config', express.json(), (req, res) => {
-  fs.writeFileSync(configPath, JSON.stringify(req.body, null, 2));
+  userConfig = req.body;
+  saveUserConfig(userConfig);
   res.sendStatus(204);
 });
 
 // ---------- SERVER LAUNCH ----------
 app.listen(port, () => {
   console.log(`Log viewer running at http://localhost:${port}`);
-  open(`http://localhost:${port}`);
+  // open(`http://localhost:${port}`);
 });
