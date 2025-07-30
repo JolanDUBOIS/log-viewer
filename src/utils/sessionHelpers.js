@@ -35,7 +35,7 @@ export async function initializeSessionParams(logs) {
       newFilters[col] = { min: '', max: '', equal: '' };
     } else if (colType === 'category') {
       const all = [...new Set(logs.map(log => log[col]))]
-      newFilters[col] = { contains: all, all: all };
+      newFilters[col] = { contains: [...all], all: all };
     }
   }
 
