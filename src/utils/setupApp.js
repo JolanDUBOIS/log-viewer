@@ -1,6 +1,7 @@
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
-import { logs, filteredLogs, columnWidths, selectedLevels, filterDropdownState } from '../stores/logStore.js';
+import { logs, filteredLogs, columnWidths, filterDropdownState } from '../stores/logStore.js';
 import { userConfig } from '../stores/configStore.js';
+import { initializeSessionParams } from './sessionHelpers.js';
 
 function initializeColumnWidths(logs) {
   if (!logs || logs.length === 0) {
@@ -20,7 +21,7 @@ function initializeColumnWidths(logs) {
 
     console.log(`Column: ${column}, Max Content Length: ${maxContentLength}`);
 
-    const estimatedWidth = maxContentLength * 8;
+    const estimatedWidth = maxContentLength * 8 + 20;  // Doesn't work very well, too large for Time, too small for Levelname... (TODO: improve this)
 
     const finalWidth = Math.min(
       COLUMN_SIZE_LIMITS.width.maxCreation,
@@ -34,33 +35,43 @@ function initializeColumnWidths(logs) {
   columnWidths.set(newWidths);
 }
 
-function initializeColumnsShown(logs) {
-  console.log('Initializing columnsShown...');
-  if (!logs || logs.length === 0) {
-    userConfig.update(config => {
-      config.columnsShown = {}; // reset to empty object
-      return config;
-    });
-    return;
-  }
+function initializeUserConfig(logs) {
+  console.log('Initializing userConfig...');
+  const columns = logs.length > 0 ? Object.keys(logs[0]) : [];
 
-  const firstRow = logs[0];
-  const newColumnsShown = {};
-
-  for (const column of Object.keys(firstRow)) {
-    newColumnsShown[column] = true; // initialize all columns to true
-  }
-
-  // Update the userConfig store here
   userConfig.update(config => {
-    return {
-      ...config,
-      columnsShown: newColumnsShown
-    };
+    const updatedConfig = { ...config };
+
+    for (const col of columns) {
+      if (!(col in updatedConfig)) {
+        updatedConfig[col] = {
+          alias: col,
+          shown: true,
+          orderBy: false,
+          type: 'text'
+        };
+      } else {
+        // Fill in missing fields if the column already exists
+        if (!('alias' in updatedConfig[col])) {
+          updatedConfig[col].alias = col;
+        }
+        if (!('shown' in updatedConfig[col])) {
+          updatedConfig[col].shown = true;
+        }
+        if (!('orderBy' in updatedConfig[col])) {
+          updatedConfig[col].orderBy = false;
+        }
+        if (!('type' in updatedConfig[col])) {
+          updatedConfig[col].type = 'text';
+        }
+      }
+    }
+
+    return updatedConfig;
   });
 }
 
-export async function initializeLogs({ setLevels, setDropdownWidth, setSchema }) {
+export async function initializeLogs({ setDropdownWidth }) {
   // const res = await fetch('/api/log');
   const res = await fetch('/api/log?path=./local-tests/log.json');
   if (!res.ok) throw new Error('Failed to fetch log file');
@@ -75,16 +86,15 @@ export async function initializeLogs({ setLevels, setDropdownWidth, setSchema })
   logs.set(parsedLogs);
   filteredLogs.set(parsedLogs);
 
-  const schema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
-  setSchema(schema); // <-- store it in a `let schema = []` in App.svelte
+  const logColSchema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
 
-  const levels = [...new Set(parsedLogs.map(log => log.levelname))];
-  selectedLevels.set(new Set(levels));
-  setLevels(levels);
+  const listLevels = [...new Set(parsedLogs.map(log => log.levelname))];
+  // selectedLevels.set(new Set(listLevels));
 
-  filterDropdownState.set(Object.fromEntries(schema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
-  setDropdownWidth(`${Math.max(...levels.map(level => level.length))}rem`);
+  filterDropdownState.set(Object.fromEntries(logColSchema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
+  setDropdownWidth(`${Math.max(...listLevels.map(level => level.length))}rem`);
 
   initializeColumnWidths(parsedLogs);
-  initializeColumnsShown(parsedLogs);
+  initializeUserConfig(parsedLogs);
+  await initializeSessionParams(parsedLogs);
 }

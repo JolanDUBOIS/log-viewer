@@ -6,9 +6,9 @@
   export let filterKey;
 
   const fields = [
-    { label: 'Filter In', valueKey: 'filterIn', placeholder: 'Include text' },
-    { label: 'Filter Out', valueKey: 'filterOut', placeholder: 'Exclude text' }
-  ];
+    { label: 'From', id: 'datetime-from', valueKey: 'from' },
+    { label: 'Until', id: 'datetime-until', valueKey: 'until' }
+  ]
 
   function updateFilter(key, value) {
     const currentFilters = get(sessionColumnFilters);
@@ -42,15 +42,15 @@
 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
   {#each fields as field}
     <div>
-      <label for={`text-${filterKey}-${field.valueKey}`} style="display: block; margin-bottom: 0.3rem;">{field.label}</label>
+      <label for={field.id} style="display: block; margin-bottom: 0.3rem;">{field.label}</label>
       <div style="position: relative;">
         <input 
-          id={`text-${filterKey}-${field.valueKey}`}
+          id={field.id}
           type="text" 
-          value={$sessionColumnFilters[filterKey][field.valueKey]}
-          placeholder={field.placeholder}
+					value={$sessionColumnFilters[filterKey][field.valueKey]}
+					on:input={(e) => updateFilter(field.valueKey, e.currentTarget.value)}
+          placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
           style="width: calc(100% - 2.5rem); padding-right: 2rem;"
-          on:input={(e) => updateFilter(field.valueKey, e.currentTarget.value)}
         />
         <ClearTextFieldButton clearFunc={() => clearField(field.valueKey)} />
       </div>

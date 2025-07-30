@@ -1,10 +1,10 @@
 import { writable } from 'svelte/store';
 
-export const userConfig = writable(null);
+export const userConfig = writable({}); // Contains for each column: alias, shown, orderBy, type
 
-export async function loadConfig() {
+export async function loadUserConfig() {
   try {
-    const res = await fetch('/api/config');
+    const res = await fetch('/api/user-config');
     if (res.ok) {
       let configData = await res.json();
     
@@ -21,16 +21,17 @@ export async function loadConfig() {
   }
 }
 
-export async function saveConfig(newConfig) {
-  const res = await fetch('/api/config', {
+export async function updateAndSaveUserConfig(newUserConfig) {
+  userConfig.set(newUserConfig);
+
+  // Save to backend
+  const res = await fetch('/api/user-config', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newConfig)
+    body: JSON.stringify(newUserConfig),
   });
 
-  if (res.ok) {
-    userConfig.set(newConfig);
-  } else {
+  if (!res.ok) {
     console.error('Failed to save config');
   }
 }

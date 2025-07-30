@@ -4,11 +4,7 @@ import path from 'path';
 const CONFIG_DIR = path.resolve('config');
 const USER_CONFIG_PATH = path.join(CONFIG_DIR, 'user.config.json');
 
-const DEFAULT_CONFIG = {
-  columnsAlias: {},
-  columnsShown: {},
-  columnOrderBy: null
-};
+const DEFAULT_CONFIG = {};
 
 export function loadUserConfig() {
   // Create config directory if needed

@@ -1,29 +1,58 @@
-export function applyAllFilters(logs, { selectedLevels, textFilters, asctimeFilter }) {
+export function applyAllFilters(logs, { sessionColumnFilters, userConfig }) {
   return logs.filter(log => {
-    // 1. LEVEL FILTER
-    if (!selectedLevels.has(log.levelname)) return false;
+    for (const col in sessionColumnFilters) {
+      const filter = sessionColumnFilters[col];
+      const config = userConfig[col];
+      if (!config) continue; // skip unknown config
 
-    // 2. TEXT FILTERS
-    for (const field in textFilters) {
-      const value = log[field] || '';
-      const { filterIn, filterOut } = textFilters[field];
-      if (filterIn && !value.includes(filterIn)) return false;
-      if (filterOut && value.includes(filterOut)) return false;
-    }
+      const colType = config.type;
+      const value = log[col];
 
-    // 3. TIMESTAMP FILTER
-    if (asctimeFilter.from) {
-      const fromTime = new Date(asctimeFilter.from);
-      if (new Date(log.asctime) < fromTime) return false;
-    }
-    if (asctimeFilter.until) {
-      const untilTime = new Date(asctimeFilter.until);
-      if (new Date(log.asctime) > untilTime) return false;
+      switch (colType) {
+        case 'category': {
+          const allowed = filter.contains;
+          if (Array.isArray(allowed) && allowed.length > 0 && !allowed.includes(value)) {
+            return false;
+          }
+          break;
+        }
+
+        case 'text': {
+          const { filterIn, filterOut } = filter;
+          const str = value || '';
+          if (filterIn && !str.includes(filterIn)) return false;
+          if (filterOut && str.includes(filterOut)) return false;
+          break;
+        }
+
+        case 'datetime': {
+          const { from, until } = filter;
+          const time = new Date(value);
+          if (from && time < new Date(from)) return false;
+          if (until && time > new Date(until)) return false;
+          break;
+        }
+
+        case 'number': {
+          const { min, max, equal } = filter;
+          const num = typeof value === 'number' ? value : Number(value);
+          if (isNaN(num)) return false;
+          if (equal !== '' && num !== Number(equal)) return false;
+          if (min !== '' && num < Number(min)) return false;
+          if (max !== '' && num > Number(max)) return false;
+          break;
+        }
+
+        default:
+          // Ignore unknown types
+          break;
+      }
     }
 
     return true;
   });
 }
+
 
 export function sortLogs(logs, order) {
   if (!Array.isArray(logs)) return [];

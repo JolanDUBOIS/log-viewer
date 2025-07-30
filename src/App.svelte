@@ -12,13 +12,11 @@
     logs,
     filteredLogs,
     displayedLogs,
-    selectedLevels,
-    textFilters,
-    asctimeFilter,
     sortOrder 
   } from './stores/logStore.js';
   import { isSidePanelOpen } from './stores/uiStore.js';
-  import { loadConfig } from './stores/configStore.js';
+  import { loadUserConfig, userConfig } from './stores/configStore.js';
+  import { loadSessionParams, sessionColumnFilters } from './stores/sessionStore.js';
 
   // Component imports
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
@@ -28,9 +26,8 @@
 
   $: {
     const result = applyAllFilters($logs, {
-      selectedLevels: $selectedLevels,
-      textFilters: $textFilters,
-      asctimeFilter: $asctimeFilter
+      sessionColumnFilters: $sessionColumnFilters,
+      userConfig: $userConfig,
     });
 
     filteredLogs.set(result);
@@ -46,20 +43,13 @@
   }
 
   // This part needs to be refactored
-  let levels = [];
   let dropdownWidth = 'auto';
-  let schema = [];
-
-  function setSchema(value) {
-    schema = value;
-  }
 
   onMount(async () => {
-    await loadConfig();
+    await loadUserConfig();
+    await loadSessionParams();
     await initializeLogs({
-      setLevels: l => levels = l,
-      setDropdownWidth: dw => dropdownWidth = dw,
-      setSchema
+      setDropdownWidth: dw => dropdownWidth = dw
     });
     document.addEventListener("click", wrappedClickHandler);
   });
@@ -79,10 +69,7 @@
   {/if}
 
   <div class="table-container">
-    <LogTable 
-      schema={schema} 
-      levels={levels} 
-    />
+    <LogTable />
   </div>
 </div>
 
