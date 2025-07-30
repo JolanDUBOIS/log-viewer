@@ -34,4 +34,7 @@ dist-ssr/
 !.vscode/extensions.json
 
 # Local test data
-public/log.json
+local-tests/
+
+# Config files
+config/user.config.json
