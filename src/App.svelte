@@ -16,12 +16,13 @@
   } from './stores/logStore.js';
   import { isSidePanelOpen } from './stores/uiStore.js';
   import { loadUserConfig, userConfig } from './stores/configStore.js';
+  import { loadHistory } from './stores/historyStore.js';
   import { loadSessionParams, sessionColumnFilters } from './stores/sessionStore.js';
 
   // Component imports
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import Header from './components/Header.svelte';
-  import SidePanel from './components/SidePanel.svelte';
+  import SidePanel from './components/side-panel/SidePanel.svelte';
   import LogTable from './components/log-table/LogTable.svelte';
 
   $: {
@@ -44,6 +45,7 @@
 
   onMount(async () => {
     await loadUserConfig();
+    await loadHistory();
     await loadSessionParams();
     await initializeLogs();
     document.addEventListener("click", wrappedClickHandler);

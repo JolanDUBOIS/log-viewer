@@ -2,7 +2,7 @@
   import { filteredLogs, logs, sortOrder } from '../stores/logStore.js'; 
   import { headerHeight } from '../constants.js';
   import { isSidePanelOpen } from '../stores/uiStore.js';
-  import { loadLogs } from '../utils/setupApp.js';
+  import { loadLogs } from '../stores/logStore.js';
 
   let reloading = false;
 
@@ -19,8 +19,7 @@
   async function reloadLogs() {
     console.log('Reloading logs');
     reloading = true; // Set reloading to true
-    const newLogs = await loadLogs(); // Fetch new logs
-    logs.set(newLogs); // Update the logs store
+    await loadLogs(); // Fetch new logs
     reloading = false; // Reset reloading to false
   }
 </script>
@@ -38,8 +37,8 @@
     <button 
       class="reload {reloading ? 'loading' : ''}" 
       on:click={reloadLogs} 
-      aria-label="Reload" 
-      title="Reload" 
+      aria-label="Reload Logs" 
+      title="Reload Logs" 
       disabled={reloading}>
       {#if reloading}
         <svg xmlns="http://www.w3.org/2000/svg" class="size-5 spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

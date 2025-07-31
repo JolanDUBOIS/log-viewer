@@ -1,5 +1,6 @@
+import { get } from 'svelte/store';
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
-import { logs, columnWidths, filterDropdownState, logColumns } from '../stores/logStore.js';
+import { logs, columnWidths, filterDropdownState, logColumns, loadLogs } from '../stores/logStore.js';
 import { userConfig } from '../stores/configStore.js';
 import { initializeSessionParams } from './sessionHelpers.js';
 
@@ -71,26 +72,10 @@ function initializeUserConfig(logs) {
   });
 }
 
-export async function loadLogs() {
-  const res = await fetch('/api/log');
-  // const res = await fetch(`/api/log?path=${encodeURIComponent(path)}`);
-  if (!res.ok) throw new Error('Failed to fetch log file');
-
-  const text = await res.text();
-
-  const parsedLogs = text
-    .split('\n')
-    .filter(line => line.trim())
-    .map(line => JSON.parse(line));
-
-  console.log('Loaded logs:', parsedLogs);
-  return parsedLogs;
-}
-
 export async function initializeLogs() {
   console.log('Initializing logs...');
-  const parsedLogs = await loadLogs();
-  logs.set(parsedLogs);
+  await loadLogs();
+  const parsedLogs = get(logs);
 
   const logColSchema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
   logColumns.set(logColSchema);
