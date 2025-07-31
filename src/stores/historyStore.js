@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 
 export const history = writable({ recent: [] });
 export const currentPath = writable('');
@@ -46,6 +46,15 @@ export async function updateAndSaveHistory(newHistory) {
   if (!res.ok) {
     console.error('Failed to save history');
   }
+}
+
+export async function deleteHistoryItem(itemPath) {
+  const currentHistory = get(history);
+  const updatedHistory = {
+    recent: currentHistory.recent.filter(item => item.path !== itemPath)
+  };
+  
+  await updateAndSaveHistory(updatedHistory);
 }
 
 // Current path management
