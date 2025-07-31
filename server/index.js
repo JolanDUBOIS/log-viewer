@@ -19,12 +19,17 @@ const port = 3001;
 // Enable CORS
 app.use(cors());
 
+let history = loadHistory();
+let sessionColumnFilters = {};
+
 // ---------- CLI ARG PARSING ----------
 const cliArgs = process.argv.slice(2);
 let logFilePath = null;
 
 if (cliArgs[0] && fs.existsSync(cliArgs[0])) {
   logFilePath = path.resolve(cliArgs[0]);
+  touchHistoryPath(history, logFilePath); 
+  saveHistory(history);
 } else {
   console.warn('No valid log file path provided at startup, starting with empty path.');
 }
@@ -75,9 +80,6 @@ app.post('/api/user-config', express.json(), (req, res) => {
   res.sendStatus(204);
 });
 
-// Load or create history on server start
-let history = loadHistory();
-
 // Get current history
 app.get('/api/history', (req, res) => {
   res.json(history);
@@ -107,9 +109,6 @@ app.post('/api/current-path', express.json(), (req, res) => {
     res.status(400).send('Invalid path provided: ' + newPath);
   }
 });
-
-// Load or create session parameters
-let sessionColumnFilters = {};  // For now, the session parameters are only composed of column filters
 
 // Get current session parameters
 app.get('/api/session-params', (req, res) => {
