@@ -1,5 +1,5 @@
 <script>
-  import { logs, displayedLogs, columnWidths } from '../../stores/logStore.js';
+  import { logs, displayedLogs, columnWidths, logColumns } from '../../stores/logStore.js';
   import { headerFontSize, headerHeight } from '../../constants.js';
   import TableCell from './TableCell.svelte';
   import CategoryFilterButton from './CategoryFilterButton.svelte';
@@ -44,7 +44,7 @@
 <table style={`margin-top: ${marginTop};`}>
   <thead>
     <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
-      {#each Object.keys($userConfig) as colKey}
+      {#each $logColumns as colKey}
         {#if $userConfig[colKey].shown}
           <th style={`width: ${$columnWidths[colKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
             {#if $userConfig[colKey].type === 'category'}
@@ -86,7 +86,7 @@
     {:else}
       {#each $displayedLogs as log}
         <tr>
-          {#each Object.keys($userConfig) as colKey}
+          {#each $logColumns as colKey}
             {#if $userConfig[colKey].shown}
             <TableCell 
               width={$columnWidths[colKey] || 'auto'} 

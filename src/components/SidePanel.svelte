@@ -1,6 +1,7 @@
 <script>
   import { get } from 'svelte/store';
   import { headerHeight } from '../constants.js';
+  import { logColumns } from '../stores/logStore.js';
   import { isSidePanelOpen } from '../stores/uiStore.js';
   import { userConfig, updateAndSaveUserConfig } from '../stores/configStore.js';
 
@@ -61,7 +62,7 @@
 >
   <h3>Columns</h3>
   <div class="columns-list">
-    {#each Object.keys($userConfig) as colKey}
+    {#each $logColumns as colKey}
       <div class="column-item">
         <button class="show-filter-toggle-button" on:click={() => toggleVisibility(colKey)} aria-label="Toggle visibility" title="Toggle visibility">
           {#if $userConfig[colKey].shown}

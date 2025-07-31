@@ -1,5 +1,5 @@
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
-import { logs, columnWidths, filterDropdownState } from '../stores/logStore.js';
+import { logs, columnWidths, filterDropdownState, logColumns } from '../stores/logStore.js';
 import { userConfig } from '../stores/configStore.js';
 import { initializeSessionParams } from './sessionHelpers.js';
 
@@ -71,7 +71,7 @@ function initializeUserConfig(logs) {
   });
 }
 
-export async function loadLogs(path = './local-tests/log.json') {
+export async function loadLogs() {
   const res = await fetch('/api/log');
   // const res = await fetch(`/api/log?path=${encodeURIComponent(path)}`);
   if (!res.ok) throw new Error('Failed to fetch log file');
@@ -82,7 +82,8 @@ export async function loadLogs(path = './local-tests/log.json') {
     .split('\n')
     .filter(line => line.trim())
     .map(line => JSON.parse(line));
-  
+
+  console.log('Loaded logs:', parsedLogs);
   return parsedLogs;
 }
 
@@ -92,6 +93,8 @@ export async function initializeLogs() {
   logs.set(parsedLogs);
 
   const logColSchema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
+  logColumns.set(logColSchema);
+  console.log('Log columns:', logColSchema);
 
   filterDropdownState.set(Object.fromEntries(logColSchema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
 

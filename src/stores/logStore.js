@@ -9,3 +9,5 @@ export const displayedLogs = writable([]); // Array of logs currently displayed 
 export const filterDropdownState = writable({}); // State for filter dropdowns
 
 export const sortOrder = writable('asc'); // Current sort order for logs (asc or desc)
+
+export const logColumns = writable([]); // Array of column names to display in the table
