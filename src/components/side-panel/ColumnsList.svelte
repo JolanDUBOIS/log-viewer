@@ -155,7 +155,7 @@
   }
 
   .show-filter-toggle-button {
-    padding: 0.25rem 0.6rem; /* Keep the adjusted padding */
+    padding: 0.25rem 0.5rem; /* Keep the adjusted padding */
     font-size: 0.85rem; /* Keep the font size unchanged */
     display: flex;
     align-items: center;
@@ -168,7 +168,7 @@
   }
 
   .edit-button {
-    padding: 0.25rem 0.6rem;
+    padding: 0.25rem 0.4rem;
     font-size: 0.85rem;
     display: flex;
     align-items: center;
@@ -182,7 +182,7 @@
   }
 
   .toggle-orderBy-button {
-    padding: 0.25rem 0.6rem;
+    padding: 0.25rem 0.4rem;
     font-size: 0.85rem;
     display: flex;
     align-items: center;

@@ -6,7 +6,7 @@
 
   function closeSidePanel() {
     // noop during dev
-    return;
+    // return;
     isSidePanelOpen.set(false);
   }
 </script>
