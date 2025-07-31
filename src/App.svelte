@@ -1,35 +1,44 @@
 <script>
+  // Svelte imports
   import { onMount, onDestroy } from 'svelte';
+
+  // Utility imports
   import { handleClickOutside } from './utils/uiHelpers.js';
   import { applyAllFilters, sortLogs } from './utils/logEngine.js';
   import { initializeLogs } from './utils/setupApp.js';
+
+  // Store imports
   import {
     logs,
     filteredLogs,
     displayedLogs,
-    selectedLevels,
-    textFilters,
-    asctimeFilter,
     sortOrder 
   } from './stores/logStore.js';
   import { isSidePanelOpen } from './stores/uiStore.js';
+  import { loadUserConfig, userConfig } from './stores/configStore.js';
+  import { loadHistory } from './stores/historyStore.js';
+  import { loadSessionParams, sessionColumnFilters } from './stores/sessionStore.js';
+
+  // Component imports
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
   import Header from './components/Header.svelte';
-  import SidePanel from './components/SidePanel.svelte';
+  import SidePanel from './components/side-panel/SidePanel.svelte';
   import LogTable from './components/log-table/LogTable.svelte';
 
   $: {
     const result = applyAllFilters($logs, {
-      selectedLevels: $selectedLevels,
-      textFilters: $textFilters,
-      asctimeFilter: $asctimeFilter
+      sessionColumnFilters: $sessionColumnFilters,
+      userConfig: $userConfig,
     });
 
     filteredLogs.set(result);
   }
 
   $: {
-    const sortedLogs = sortLogs($filteredLogs, $sortOrder);
+    const sortedLogs = sortLogs($filteredLogs, {
+      order: $sortOrder,
+      userConfig: $userConfig,
+    });
     displayedLogs.set(sortedLogs);
   }
   
@@ -37,22 +46,11 @@
     handleClickOutside(event);
   }
 
-  // This part needs to be refactored
-  let levels = [];
-  let dropdownWidth = 'auto';
-  let schema = [];
-
-  function setSchema(value) {
-    schema = value;
-  }
-
   onMount(async () => {
-    await initializeLogs({
-      setLevels: l => levels = l,
-      setDropdownWidth: dw => dropdownWidth = dw,
-      setSchema
-    });
-
+    await loadUserConfig();
+    await loadHistory();
+    await loadSessionParams();
+    await initializeLogs();
     document.addEventListener("click", wrappedClickHandler);
   });
   // -------------------------------
@@ -71,10 +69,7 @@
   {/if}
 
   <div class="table-container">
-    <LogTable 
-      schema={schema} 
-      levels={levels} 
-    />
+    <LogTable />
   </div>
 </div>
 

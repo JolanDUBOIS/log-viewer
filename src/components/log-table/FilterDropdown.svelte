@@ -33,7 +33,7 @@
   <button 
     on:mouseenter={onButtonMouseEnter}
     on:mouseleave={() => setHover('buttonHovered', false)}
-    style="width: 100%; display: flex; align-items: center; justify-content: center;"
+    style="width: 100%; display: flex; align-items: center; justify-content: center; font-size: 1rem; padding: 0.2rem 0.5rem;"
   >
     {filterName}
   </button>

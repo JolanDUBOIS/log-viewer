@@ -1,5 +1,8 @@
+import { get } from 'svelte/store';
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
-import { logs, filteredLogs, columnWidths, columnsShown, selectedLevels, filterDropdownState } from '../stores/logStore.js';
+import { logs, columnWidths, filterDropdownState, logColumns, loadLogs } from '../stores/logStore.js';
+import { userConfig } from '../stores/configStore.js';
+import { initializeSessionParams } from './sessionHelpers.js';
 
 function initializeColumnWidths(logs) {
   if (!logs || logs.length === 0) {
@@ -19,7 +22,7 @@ function initializeColumnWidths(logs) {
 
     console.log(`Column: ${column}, Max Content Length: ${maxContentLength}`);
 
-    const estimatedWidth = maxContentLength * 8;
+    const estimatedWidth = maxContentLength * 8 + 20;  // Doesn't work very well, too large for Time, too small for Levelname... (TODO: improve this)
 
     const finalWidth = Math.min(
       COLUMN_SIZE_LIMITS.width.maxCreation,
@@ -33,53 +36,54 @@ function initializeColumnWidths(logs) {
   columnWidths.set(newWidths);
 }
 
-function initializeColumnsShown(logs) {
-  if (!logs || logs.length === 0) {
-    columnsShown.set({}); // reset global store to empty object
-    return;
-  }
+function initializeUserConfig(logs) {
+  console.log('Initializing userConfig...');
+  const columns = logs.length > 0 ? Object.keys(logs[0]) : [];
 
-  const firstRow = logs[0];
-  const newColumnsShown = {};
+  userConfig.update(config => {
+    const updatedConfig = { ...config };
 
-  for (const column of Object.keys(firstRow)) {
-    newColumnsShown[column] = true; // initialize all columns to true
-  }
+    for (const col of columns) {
+      if (!(col in updatedConfig)) {
+        updatedConfig[col] = {
+          alias: col,
+          shown: true,
+          orderBy: false,
+          type: 'text'
+        };
+      } else {
+        // Fill in missing fields if the column already exists
+        if (!('alias' in updatedConfig[col])) {
+          updatedConfig[col].alias = col;
+        }
+        if (!('shown' in updatedConfig[col])) {
+          updatedConfig[col].shown = true;
+        }
+        if (!('orderBy' in updatedConfig[col])) {
+          updatedConfig[col].orderBy = false;
+        }
+        if (!('type' in updatedConfig[col])) {
+          updatedConfig[col].type = 'text';
+        }
+      }
+    }
 
-  // Update the writable store here
-  columnsShown.set(newColumnsShown);
+    return updatedConfig;
+  });
 }
 
-export async function initializeLogs({
-  setLevels,
-  setDropdownWidth,
-  setSchema
-}) {
-  const res = await fetch('/log.json');
-  const text = await res.text();
+export async function initializeLogs() {
+  console.log('Initializing logs...');
+  await loadLogs();
+  const parsedLogs = get(logs);
 
-  const parsedLogs = text
-    .split('\n')
-    .filter(line => line.trim())
-    .map(line => JSON.parse(line));
+  const logColSchema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
+  logColumns.set(logColSchema);
+  console.log('Log columns:', logColSchema);
 
-  logs.set(parsedLogs);
-  filteredLogs.set(parsedLogs);
-
-  // Extract and set schema safely
-  const schema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
-  setSchema(schema); // <-- store it in a `let schema = []` in App.svelte
-
-  const levels = [...new Set(parsedLogs.map(log => log.levelname))];
-  selectedLevels.set(new Set(levels));
-  setLevels(levels);
-
-  // Initialize filterDropdownState for each level
-  filterDropdownState.set(Object.fromEntries(schema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
-
-  // Dropdown width based on longest level name
-  setDropdownWidth(`${Math.max(...levels.map(level => level.length))}rem`);
+  filterDropdownState.set(Object.fromEntries(logColSchema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
 
   initializeColumnWidths(parsedLogs);
-  initializeColumnsShown(parsedLogs);
+  initializeUserConfig(parsedLogs);
+  await initializeSessionParams(parsedLogs);
 }

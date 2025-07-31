@@ -27,7 +27,7 @@
 
   td {
     border: 1px solid #ccc;
-    padding: 0.4rem 0.6rem;
+    padding: 0.2rem 0.6rem; /* Reduced top and bottom padding */
     text-align: left;
     white-space: nowrap; /* Ensure all fields are displayed as one-liners */
     overflow: hidden; /* Hide overflow content */

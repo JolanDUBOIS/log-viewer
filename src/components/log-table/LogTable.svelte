@@ -1,11 +1,12 @@
 <script>
-  import { logs, displayedLogs, columnWidths, columnsShown } from '../../stores/logStore.js';
-  import { headerFontSize, headerHeight, columnLayoutConfig } from '../../constants.js';
+  import { logs, displayedLogs, columnWidths, logColumns } from '../../stores/logStore.js';
+  import { headerFontSize, headerHeight } from '../../constants.js';
   import TableCell from './TableCell.svelte';
-  import LevelnameFilterButton from './LevelnameFilterButton.svelte';
-  import AsctimeFilterButton from './AsctimeFilterButton.svelte';
+  import CategoryFilterButton from './CategoryFilterButton.svelte';
+  import DatetimeFilterButton from './DatetimeFilterButton.svelte';
   import TextFilterButton from './TextFilterButton.svelte';
   import FilterDropdown from './FilterDropdown.svelte';
+  import { userConfig } from '../../stores/configStore.js';
 
   let resizingColumn = null;
   let startX = 0;
@@ -35,9 +36,6 @@
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
   }
-
-  export let schema = [];
-  export let levels = [];
   
   const numericHeight = parseInt(headerHeight, 10);
   const marginTop = numericHeight + 40 + 'px';
@@ -46,33 +44,33 @@
 <table style={`margin-top: ${marginTop};`}>
   <thead>
     <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
-      {#each schema as filterKey}
-      {#if $columnsShown[filterKey]}
-        <th style={`width: ${$columnWidths[filterKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
-            {#if filterKey === 'levelname'}
+      {#each $logColumns as colKey}
+        {#if $userConfig[colKey].shown}
+          <th style={`width: ${$columnWidths[colKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
+            {#if $userConfig[colKey].type === 'category'}
               <!-- Filter button for levelname -->
-              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
-                <LevelnameFilterButton slot="dropdown-content" levels={levels}/>
+              <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
+                <CategoryFilterButton slot="dropdown-content" filterKey={colKey}/>
               </FilterDropdown>
-            {:else if filterKey === 'asctime'}
+            {:else if $userConfig[colKey].type === 'datetime'}
               <!-- Filter button for asctime -->
-              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
-                <AsctimeFilterButton slot="dropdown-content"/>
+              <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
+                <DatetimeFilterButton slot="dropdown-content" filterKey={colKey}/>
               </FilterDropdown>
-            {:else if ['filename', 'funcName', 'message', 'name'].includes(filterKey)}
+            {:else if $userConfig[colKey].type === 'text'}
               <!-- Filter button for filename, funcName, and message -->
-              <FilterDropdown filterKey={filterKey} filterName={columnLayoutConfig[filterKey].alias}>
-                <TextFilterButton slot="dropdown-content" filterKey={filterKey}/>
+              <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
+                <TextFilterButton slot="dropdown-content" filterKey={colKey}/>
               </FilterDropdown>
-              {:else}
-              <!-- Placeholder button for other fields -->
-              <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{columnLayoutConfig[filterKey].alias}</button>
-              {/if}
-              <!-- svelte-ignore a11y_no_static_element_interactions -->
-              <div 
-              style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
-              on:mousedown={(event) => handleMouseDown(event, filterKey)}
-              ></div>
+            {:else}
+            <!-- Placeholder button for other fields -->
+            <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{$userConfig[colKey].alias}</button>
+            {/if}
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <div 
+            style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
+            on:mousedown={(event) => handleMouseDown(event, colKey)}
+            ></div>
           </th>
         {/if}
       {/each}
@@ -88,11 +86,11 @@
     {:else}
       {#each $displayedLogs as log}
         <tr>
-          {#each schema as key}
-            {#if $columnsShown[key]}
+          {#each $logColumns as colKey}
+            {#if $userConfig[colKey].shown}
             <TableCell 
-              width={$columnWidths[key] || 'auto'} 
-              value={log[key]}
+              width={$columnWidths[colKey] || 'auto'} 
+              value={log[colKey]}
             ></TableCell>
             {/if}
           {/each}
