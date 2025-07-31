@@ -1,7 +1,11 @@
 <script>
   import { get } from 'svelte/store';
+  import { tick } from 'svelte'; // Import tick
   import { logColumns } from '../../stores/logStore.js';
   import { userConfig, updateAndSaveUserConfig } from '../../stores/configStore.js';
+
+  let colEditMode = null;
+  let inputRefs = {}; // Store references to input elements
 
   function toggleVisibility(columnKey) {
     const currentConfig = get(userConfig);
@@ -15,10 +19,12 @@
     updateAndSaveUserConfig(newUserConfig);
   }
 
-  let colEditMode = null;
-
-  function enterEditMode(columnKey) {
+  async function enterEditMode(columnKey) {
     colEditMode = colEditMode === columnKey ? null : columnKey;
+    if (colEditMode) {
+      await tick(); // Wait for DOM updates
+      inputRefs[columnKey]?.focus(); // Focus the input field
+    }
   }
 
   function handleInputKeydown(event, colKey) {
@@ -46,6 +52,20 @@
     };
     updateAndSaveUserConfig(updatedConfig);
   }
+
+  function toggleOrderBy(columnKey) {
+    const currentConfig = get(userConfig);
+    const newUserConfig = {};
+
+    for (const key in currentConfig) {
+      newUserConfig[key] = {
+        ...currentConfig[key],
+        orderBy: key === columnKey
+      };
+    }
+
+    updateAndSaveUserConfig(newUserConfig);
+  }
 </script>
 
 <div class="columns-list">
@@ -65,18 +85,21 @@
         {/if}
       </button>
 
-      {#if colKey === colEditMode}
-        <input 
-          type="text" 
-          class="alias-input" 
-          value={$userConfig[colKey].alias} 
-          placeholder="Edit alias" 
-          on:keydown={(event) => handleInputKeydown(event, colKey)} 
-          on:blur={(event) => handleInputBlur(colKey, event)}
-        />
-      {:else}
-        <span>{$userConfig[colKey].alias}</span>
-      {/if}
+      <div class="alias-container">
+        {#if colKey === colEditMode}
+          <input 
+            type="text" 
+            class="alias-input" 
+            value={$userConfig[colKey].alias} 
+            placeholder="Edit alias" 
+            bind:this={inputRefs[colKey]}
+            on:keydown={(event) => handleInputKeydown(event, colKey)} 
+            on:blur={(event) => handleInputBlur(colKey, event)}
+          />
+        {:else}
+          <span>{$userConfig[colKey].alias}</span>
+        {/if}
+      </div>
 
       <button class="edit-button" on:click={() => enterEditMode(colKey)} aria-label="Enter edit mode" title="Enter edit mode">
         {#if colEditMode === colKey}
@@ -89,6 +112,29 @@
           </svg>   
         {/if}           
       </button>
+
+      <button 
+        class="toggle-orderBy-button" 
+        on:click={() => !$userConfig[colKey].orderBy && toggleOrderBy(colKey)} 
+        aria-label="Toggle order by" 
+        title="Toggle order by"
+        class:disabled={$userConfig[colKey].orderBy}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-up-icon lucide-arrow-down-up">
+          <path d="m3 16 4 4 4-4"/>
+          <path d="M7 20V4"/>
+          <path d="m21 8-4-4-4 4"/>
+          <path d="M17 4v16"/>
+        </svg>  
+      </button>
+
+      <!-- <button class="choose-type-button" aria-label="Choose type" title="Choose type">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+        </svg>
+      </button> -->
+
     </div>
   {/each}
 </div>
@@ -105,7 +151,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between; /* Ensure buttons are spaced apart */
-    gap: 0.5rem;
+    gap: 0.1rem;
   }
 
   .show-filter-toggle-button {
@@ -135,13 +181,51 @@
     height: 1rem;
   }
 
-  .alias-input {
-    flex-grow: 0; /* Prevent the input from growing too large */
-    max-width: 145px; /* Set a maximum width for the input */
+  .toggle-orderBy-button {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease; /* Smooth transition for opacity */
+  }
+
+  .toggle-orderBy-button.disabled {
+    opacity: 0.4; /* Reduced opacity when disabled */
+    cursor: not-allowed; /* Change cursor to not-allowed */
+    pointer-events: none; /* Disable click events */
+  }
+
+  .toggle-orderBy-button svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .alias-container {
+    flex-grow: 1; /* Allow the container to take up available space */
+    max-width: 145px; /* Constrain the maximum width */
+    display: flex;
+    align-items: center;
+  }
+
+  .alias-input, .alias-container span {
+    width: 100%; /* Ensure the input and span take up the same space */
     padding: 0.25rem;
     font-size: 0.85rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
     font-family: inherit; /* Use the same font as the parent element */
+  }
+
+  .alias-input {
+    border: 1px solid #ccc; /* Add border only for the input */
+    border-radius: 4px;
+  }
+
+  .alias-container span {
+    display: inline-block; /* Ensure span behaves like the input */
+    border: none; /* Remove border for the span */
+    overflow: hidden; /* Prevent overflow */
+    text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+    white-space: nowrap; /* Prevent text wrapping */
+    text-align: left; /* Align text to the left */
   }
 </style>
