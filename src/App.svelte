@@ -35,7 +35,10 @@
   }
 
   $: {
-    const sortedLogs = sortLogs($filteredLogs, $sortOrder);
+    const sortedLogs = sortLogs($filteredLogs, {
+      order: $sortOrder,
+      userConfig: $userConfig,
+    });
     displayedLogs.set(sortedLogs);
   }
   

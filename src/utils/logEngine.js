@@ -54,11 +54,25 @@ export function applyAllFilters(logs, { sessionColumnFilters, userConfig }) {
 }
 
 
-export function sortLogs(logs, order) {
+export function sortLogs(logs, { order, userConfig }) {
   if (!Array.isArray(logs)) return [];
 
+  const orderKeys = Object.entries(userConfig)
+    .filter(([_, cfg]) => cfg.orderBy)
+    .map(([key]) => key);
+
+  if (orderKeys.length === 0) return [...logs]; // No sorting if no orderBy set
+  if (orderKeys.length > 1) throw new Error('Multiple columns have orderBy=true. Only one is allowed.');
+
+  const key = orderKeys[0];
+
   return [...logs].sort((a, b) => {
-    const diff = a.created - b.created;
-    return order === 'asc' ? diff : -diff;
+    const aVal = a[key];
+    const bVal = b[key];
+
+    // Basic comparison
+    if (aVal < bVal) return order === 'asc' ? -1 : 1;
+    if (aVal > bVal) return order === 'asc' ? 1 : -1;
+    return 0;
   });
 }
