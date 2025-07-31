@@ -42,15 +42,10 @@
     handleClickOutside(event);
   }
 
-  // This part needs to be refactored
-  let dropdownWidth = 'auto';
-
   onMount(async () => {
     await loadUserConfig();
     await loadSessionParams();
-    await initializeLogs({
-      setDropdownWidth: dw => dropdownWidth = dw
-    });
+    await initializeLogs();
     document.addEventListener("click", wrappedClickHandler);
   });
   // -------------------------------

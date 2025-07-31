@@ -1,5 +1,5 @@
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
-import { logs, filteredLogs, columnWidths, filterDropdownState } from '../stores/logStore.js';
+import { logs, columnWidths, filterDropdownState } from '../stores/logStore.js';
 import { userConfig } from '../stores/configStore.js';
 import { initializeSessionParams } from './sessionHelpers.js';
 
@@ -71,9 +71,9 @@ function initializeUserConfig(logs) {
   });
 }
 
-export async function initializeLogs({ setDropdownWidth }) {
-  // const res = await fetch('/api/log');
-  const res = await fetch('/api/log?path=./local-tests/log.json');
+export async function loadLogs(path = './local-tests/log.json') {
+  const res = await fetch('/api/log');
+  // const res = await fetch(`/api/log?path=${encodeURIComponent(path)}`);
   if (!res.ok) throw new Error('Failed to fetch log file');
 
   const text = await res.text();
@@ -82,17 +82,18 @@ export async function initializeLogs({ setDropdownWidth }) {
     .split('\n')
     .filter(line => line.trim())
     .map(line => JSON.parse(line));
+  
+  return parsedLogs;
+}
 
+export async function initializeLogs() {
+  console.log('Initializing logs...');
+  const parsedLogs = await loadLogs();
   logs.set(parsedLogs);
-  filteredLogs.set(parsedLogs);
 
   const logColSchema = parsedLogs.length > 0 ? Object.keys(parsedLogs[0]) : [];
 
-  const listLevels = [...new Set(parsedLogs.map(log => log.levelname))];
-  // selectedLevels.set(new Set(listLevels));
-
   filterDropdownState.set(Object.fromEntries(logColSchema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
-  setDropdownWidth(`${Math.max(...listLevels.map(level => level.length))}rem`);
 
   initializeColumnWidths(parsedLogs);
   initializeUserConfig(parsedLogs);
