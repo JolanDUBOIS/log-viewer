@@ -1,12 +1,14 @@
 <script>
   import { get } from 'svelte/store';
+  import { tick } from 'svelte'; // Import tick
   import { history } from '../../stores/historyStore.js';
-  import { updateAndSaveHistory, updateCurrentPath } from '../../stores/historyStore.js';
+  import { updateAndSaveHistory, updateCurrentPath, deleteHistoryItem } from '../../stores/historyStore.js';
   import { loadLogs } from '../../stores/logStore.js';
 
   $: recentFiles = $history.recent.slice(0, 5).map(entry => entry.alias);
 
   let fileEditMode = null;
+  let inputRefs = {}; // Store references to input elements
 
   async function clickFile(fileAlias) {
     console.log('Clicked file:', fileAlias);
@@ -23,11 +25,16 @@
 
   async function deleteFile(fileAlias) {
     console.log('Deleting file:', fileAlias);
-    // TODO 
+    let filePath = get(history).recent.find(item => item.alias === fileAlias)?.path;
+    await deleteHistoryItem(filePath);
   }
 
-  function enterEditMode(fileAlias) {
+  async function enterEditMode(fileAlias) {
     fileEditMode = fileEditMode === fileAlias ? null : fileAlias;
+    if (fileEditMode) {
+      await tick(); // Wait for DOM updates
+      inputRefs[fileAlias]?.focus(); // Focus the input field
+    }
   }
 
   function handleInputKeydown(event, fileAlias) {
@@ -54,6 +61,8 @@
     };
     updateAndSaveHistory(updatedHistory);
   }
+
+  function addFile() {}
 </script>
 
 <div class="log-files-list">
@@ -65,6 +74,7 @@
           class="alias-input" 
           value={fileAlias} 
           placeholder="Edit alias" 
+          bind:this={inputRefs[fileAlias]}
           on:keydown={(event) => handleInputKeydown(event, fileAlias)} 
           on:blur={(event) => handleInputBlur(fileAlias, event)}
         />
@@ -86,7 +96,7 @@
         {/if}
       </button>
 
-      <button class="delete-button" on:click={() => enterEditMode(fileAlias)} aria-label="Delete File from History" title="Delete File from History">
+      <button class="delete-button" on:click={() => deleteFile(fileAlias)} aria-label="Delete File from History" title="Delete File from History">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
           <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
         </svg>
@@ -130,6 +140,9 @@
     align-items: center; /* Vertically center the text */
     width: 100%; /* Ensure the button spans the full width of the container */
     height: 100%; /* Ensure the button spans the full height of the container */
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflowing text */
+    text-overflow: ellipsis; /* Add ellipsis for overflowing text */
   }
 
   .edit-button, .delete-button {
