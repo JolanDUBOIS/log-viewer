@@ -37,4 +37,4 @@ dist-ssr/
 local-tests/
 
 # Config files
-config/user.config.json
+config/
