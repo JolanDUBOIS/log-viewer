@@ -1,7 +1,7 @@
 <script>
   import { headerFontSize, headerHeight } from '../../constants.js';
   import { logs, displayedLogs, columnWidths, logColumns } from '../../stores/logStore.js';
-  import { userConfigColumns } from '../../stores/configStore.js';
+  import { userConfigColumns, levelColumn } from '../../stores/configStore.js';
   import TableCell from './TableCell.svelte';
   import FilterButton from '../filters/FilterButton.svelte';
 
@@ -70,6 +70,7 @@
             <TableCell 
               width={$columnWidths[colKey] || 'auto'} 
               value={log[colKey]}
+              rowLevel={log[$levelColumn]}
             ></TableCell>
             {/if}
           {/each}

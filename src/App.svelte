@@ -15,7 +15,7 @@
     sortOrder 
   } from './stores/logStore.js';
   import { isSidePanelOpen } from './stores/uiStore.js';
-  import { loadUserConfigColumns, userConfigColumns } from './stores/configStore.js';
+  import { loadUserConfigColumns, loadLevelColumn, userConfigColumns } from './stores/configStore.js';
   import { loadHistory } from './stores/historyStore.js';
   import { loadSessionFilters, sessionFilters } from './stores/sessionStore.js';
 
@@ -47,6 +47,7 @@
   }
 
   onMount(async () => {
+    await loadLevelColumn();
     await loadUserConfigColumns();
     await loadHistory();
     await loadSessionFilters();
