@@ -1,6 +1,6 @@
 <script>
-  import { filteredLogs, logs, sortOrder } from '../stores/logStore.js'; 
   import { headerHeight } from '../constants.js';
+  import { filteredLogs, logs, sortOrder } from '../stores/logStore.js'; 
   import { isSidePanelOpen } from '../stores/uiStore.js';
   import { loadLogs } from '../stores/logStore.js';
 

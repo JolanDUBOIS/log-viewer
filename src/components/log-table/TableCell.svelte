@@ -1,5 +1,6 @@
 <script>
   import { showCellContent } from "../../utils/uiHelpers";
+
   export let width;
   export let value;
 </script>
