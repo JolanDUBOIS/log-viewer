@@ -1,6 +1,11 @@
 import { writable } from 'svelte/store';
 
 export const userConfigColumns = writable({}); // Contains for each column: alias, shown, orderBy, type
+export let levelColumn = writable(null); // Contains the column name for the level column, e.g. "level" or "levelname"
+
+export function loadLevelColumn() {
+  levelColumn.set('levelname'); // Default to "levelname", TODO - implement real logic here
+}
 
 export async function loadUserConfigColumns() {
   try {
