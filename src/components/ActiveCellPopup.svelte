@@ -29,7 +29,7 @@
 
     white-space: pre-wrap;
     word-wrap: break-word;
-    font-size: inherit;
+    font-size: 0.85rem;
     font-family: inherit;
     text-align: left;
   }

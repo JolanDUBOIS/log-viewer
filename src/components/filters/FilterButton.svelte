@@ -1,15 +1,19 @@
 <script>
-	import { filterDropdownState } from '../../stores/logStore.js';
   import { isDropdownVisible } from '../../utils/dropdownHelpers.js';
   import { getDropdownPosition } from '../../utils/uiHelpers.js';
-  export let filterKey;
-  export let filterName;
+  import { userConfigColumns } from '../../stores/configStore.js';
+	import { filterDropdownState } from '../../stores/logStore.js';
+  import CategoryFilterButton from '../filters/CategoryFilterButton.svelte';
+  import DatetimeFilterButton from '../filters/DatetimeFilterButton.svelte';
+  import TextFilterButton from '../filters/TextFilterButton.svelte';
+  
+  export let colKey;
 
   function setHover(part, value) {
     filterDropdownState.update(state => ({
       ...state,
-      [filterKey]: {
-        ...state[filterKey],
+      [colKey]: {
+        ...state[colKey],
         [part]: value
       }
     }));
@@ -20,8 +24,8 @@
     const position = getDropdownPosition(event);
     filterDropdownState.update(state => ({
       ...state,
-      [filterKey]: {
-        ...state[filterKey],
+      [colKey]: {
+        ...state[colKey],
         visible: true,
         position
       }
@@ -35,17 +39,26 @@
     on:mouseleave={() => setHover('buttonHovered', false)}
     style="width: 100%; display: flex; align-items: center; justify-content: center; font-size: 1rem; padding: 0.2rem 0.5rem;"
   >
-    {filterName}
+    {$userConfigColumns[colKey].alias}
   </button>
-  {#if isDropdownVisible(filterKey, $filterDropdownState)}
+  {#if isDropdownVisible(colKey, $filterDropdownState)}
     <div
       role="region"
       class="dropdown"
-      style={`top: ${$filterDropdownState[filterKey].position.top}px; left: ${$filterDropdownState[filterKey].position.left}px;`}
+      style={`top: ${$filterDropdownState[colKey].position.top}px; left: ${$filterDropdownState[colKey].position.left}px;`}
       on:mouseenter={() => setHover('dropdownHovered', true)}
       on:mouseleave={() => setHover('dropdownHovered', false)}
     >
-      <slot name="dropdown-content"></slot>
+      {#if $userConfigColumns[colKey].type === 'category'}
+        <CategoryFilterButton filterKey={colKey}/>
+      {:else if $userConfigColumns[colKey].type === 'datetime'}
+        <DatetimeFilterButton filterKey={colKey}/>
+      {:else if $userConfigColumns[colKey].type === 'text'}
+        <TextFilterButton filterKey={colKey}/>
+      {:else}
+        <!-- Placeholder button for other fields -->
+        <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{$userConfigColumns[colKey].alias}</button>
+      {/if}
     </div>
   {/if}
 </div>

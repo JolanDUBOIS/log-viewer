@@ -1,17 +1,22 @@
 import { writable } from 'svelte/store';
 
-export const userConfig = writable({}); // Contains for each column: alias, shown, orderBy, type
+export const userConfigColumns = writable({}); // Contains for each column: alias, shown, orderBy, type
+export let levelColumn = writable(null); // Contains the column name for the level column, e.g. "level" or "levelname"
 
-export async function loadUserConfig() {
+export function loadLevelColumn() {
+  levelColumn.set('levelname'); // Default to "levelname", TODO - implement real logic here
+}
+
+export async function loadUserConfigColumns() {
   try {
-    const res = await fetch('/api/user-config');
+    const res = await fetch('/api/user-config/columns');
     if (res.ok) {
       let configData = await res.json();
     
       const snapshot = JSON.parse(JSON.stringify(configData));
       console.log('Loaded config snapshot:', snapshot);
     
-      userConfig.set(configData);
+      userConfigColumns.set(configData);
     } else {
       const errorText = await res.text();
       console.error('Failed to load config:', res.status, errorText);
@@ -21,14 +26,14 @@ export async function loadUserConfig() {
   }
 }
 
-export async function updateAndSaveUserConfig(newUserConfig) {
-  userConfig.set(newUserConfig);
+export async function updateAndSaveUserConfigColumns(newUserConfigColumns) {
+  userConfigColumns.set(newUserConfigColumns);
 
   // Save to backend
-  const res = await fetch('/api/user-config', {
+  const res = await fetch('/api/user-config/columns', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newUserConfig),
+    body: JSON.stringify(newUserConfigColumns),
   });
 
   if (!res.ok) {

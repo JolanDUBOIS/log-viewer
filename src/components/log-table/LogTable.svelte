@@ -1,12 +1,9 @@
 <script>
-  import { logs, displayedLogs, columnWidths, logColumns } from '../../stores/logStore.js';
   import { headerFontSize, headerHeight } from '../../constants.js';
+  import { logs, displayedLogs, columnWidths, logColumns } from '../../stores/logStore.js';
+  import { userConfigColumns, levelColumn } from '../../stores/configStore.js';
   import TableCell from './TableCell.svelte';
-  import CategoryFilterButton from './CategoryFilterButton.svelte';
-  import DatetimeFilterButton from './DatetimeFilterButton.svelte';
-  import TextFilterButton from './TextFilterButton.svelte';
-  import FilterDropdown from './FilterDropdown.svelte';
-  import { userConfig } from '../../stores/configStore.js';
+  import FilterButton from '../filters/FilterButton.svelte';
 
   let resizingColumn = null;
   let startX = 0;
@@ -45,27 +42,9 @@
   <thead>
     <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
       {#each $logColumns as colKey}
-        {#if $userConfig[colKey].shown}
+        {#if $userConfigColumns[colKey].shown}
           <th style={`width: ${$columnWidths[colKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
-            {#if $userConfig[colKey].type === 'category'}
-              <!-- Filter button for levelname -->
-              <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
-                <CategoryFilterButton slot="dropdown-content" filterKey={colKey}/>
-              </FilterDropdown>
-            {:else if $userConfig[colKey].type === 'datetime'}
-              <!-- Filter button for asctime -->
-              <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
-                <DatetimeFilterButton slot="dropdown-content" filterKey={colKey}/>
-              </FilterDropdown>
-            {:else if $userConfig[colKey].type === 'text'}
-              <!-- Filter button for filename, funcName, and message -->
-              <FilterDropdown filterKey={colKey} filterName={$userConfig[colKey].alias}>
-                <TextFilterButton slot="dropdown-content" filterKey={colKey}/>
-              </FilterDropdown>
-            {:else}
-            <!-- Placeholder button for other fields -->
-            <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{$userConfig[colKey].alias}</button>
-            {/if}
+            <FilterButton colKey={colKey} />
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div 
             style="position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize;" 
@@ -87,10 +66,11 @@
       {#each $displayedLogs as log}
         <tr>
           {#each $logColumns as colKey}
-            {#if $userConfig[colKey].shown}
+            {#if $userConfigColumns[colKey].shown}
             <TableCell 
               width={$columnWidths[colKey] || 'auto'} 
               value={log[colKey]}
+              rowLevel={log[$levelColumn]}
             ></TableCell>
             {/if}
           {/each}

@@ -1,7 +1,7 @@
 <script>
-  import ClearTextFieldButton from './ClearTextFieldButton.svelte';
   import { get } from 'svelte/store';
-  import { updateSessionParams, sessionColumnFilters } from '../../stores/sessionStore.js';
+  import { updateSessionFilters, sessionFilters } from '../../stores/sessionStore.js';
+  import ClearTextFieldButton from './ClearTextFieldButton.svelte';
 
   export let filterKey;
 
@@ -11,7 +11,7 @@
   ]
 
   function updateFilter(key, value) {
-    const currentFilters = get(sessionColumnFilters);
+    const currentFilters = get(sessionFilters);
     const newFilters = { ...currentFilters };
 
     if (!newFilters[filterKey]) return; // safety check
@@ -21,11 +21,11 @@
       [key]: value
     };
 
-    updateSessionParams(newFilters);
+    updateSessionFilters(newFilters);
   }
 
   function clearField(key) {
-    const currentFilters = get(sessionColumnFilters);
+    const currentFilters = get(sessionFilters);
     const newFilters = { ...currentFilters };
 
     if (!newFilters[filterKey]) return;
@@ -35,7 +35,7 @@
       [key]: ''
     };
 
-    updateSessionParams(newFilters);
+    updateSessionFilters(newFilters);
   }
 </script>
 
@@ -47,7 +47,7 @@
         <input 
           id={field.id}
           type="text" 
-					value={$sessionColumnFilters[filterKey][field.valueKey]}
+					value={$sessionFilters[filterKey][field.valueKey]}
 					on:input={(e) => updateFilter(field.valueKey, e.currentTarget.value)}
           placeholder="Enter time (e.g., YYYY-MM-DD HH:mm:ss)"
           style="width: calc(100% - 2.5rem); padding-right: 2rem;"

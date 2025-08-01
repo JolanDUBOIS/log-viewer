@@ -1,7 +1,7 @@
-export function applyAllFilters(logs, { sessionColumnFilters, userConfig }) {
+export function applyAllFilters(logs, { sessionFilters, userConfig }) {
   return logs.filter(log => {
-    for (const col in sessionColumnFilters) {
-      const filter = sessionColumnFilters[col];
+    for (const col in sessionFilters) {
+      const filter = sessionFilters[col];
       const config = userConfig[col];
       if (!config) continue; // skip unknown config
 

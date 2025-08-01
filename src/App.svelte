@@ -15,9 +15,9 @@
     sortOrder 
   } from './stores/logStore.js';
   import { isSidePanelOpen } from './stores/uiStore.js';
-  import { loadUserConfig, userConfig } from './stores/configStore.js';
+  import { loadUserConfigColumns, loadLevelColumn, userConfigColumns } from './stores/configStore.js';
   import { loadHistory } from './stores/historyStore.js';
-  import { loadSessionParams, sessionColumnFilters } from './stores/sessionStore.js';
+  import { loadSessionFilters, sessionFilters } from './stores/sessionStore.js';
 
   // Component imports
   import ActiveCellPopup from './components/ActiveCellPopup.svelte';
@@ -27,8 +27,8 @@
 
   $: {
     const result = applyAllFilters($logs, {
-      sessionColumnFilters: $sessionColumnFilters,
-      userConfig: $userConfig,
+      sessionFilters: $sessionFilters,
+      userConfig: $userConfigColumns,
     });
 
     filteredLogs.set(result);
@@ -37,7 +37,7 @@
   $: {
     const sortedLogs = sortLogs($filteredLogs, {
       order: $sortOrder,
-      userConfig: $userConfig,
+      userConfig: $userConfigColumns,
     });
     displayedLogs.set(sortedLogs);
   }
@@ -47,9 +47,10 @@
   }
 
   onMount(async () => {
-    await loadUserConfig();
+    await loadLevelColumn();
+    await loadUserConfigColumns();
     await loadHistory();
-    await loadSessionParams();
+    await loadSessionFilters();
     await initializeLogs();
     document.addEventListener("click", wrappedClickHandler);
   });

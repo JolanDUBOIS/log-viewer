@@ -1,7 +1,13 @@
 <script>
   import { showCellContent } from "../../utils/uiHelpers";
+  import { LOG_LEVEL_STYLE } from "../../constants.js";
+
   export let width;
   export let value;
+  export let rowLevel;
+
+  $: cellTextColor = LOG_LEVEL_STYLE[rowLevel?.toLowerCase()].color || '#000'; // Default to black if level not found
+  $: cellFontWeight = LOG_LEVEL_STYLE[rowLevel?.toLowerCase()].fontWeight || 'normal'; // Default to normal if level not found
 </script>
 
 <td style={`width: ${width || 'auto'};`}>
@@ -9,6 +15,7 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class="table-cell"
+    style={`color: ${cellTextColor}; font-weight: ${cellFontWeight};`}
     on:click={(event) => {
       event.stopPropagation();
       showCellContent(event, value);
