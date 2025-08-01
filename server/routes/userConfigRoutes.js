@@ -5,14 +5,14 @@ import { saveUserConfig } from '../managers/userConfigManager.js';
 export default function createUserConfigRouter({ userConfig }) {
   const router = express.Router();
 
-  router.get('/', (req, res) => {
+  router.get('/columns', (req, res) => {
     console.log('Fetching user config');
-    res.json(userConfig);
+    res.json(userConfig.columns);
   });
 
   // Update config and save it
-  router.post('/', express.json(), (req, res) => {
-    userConfig = req.body;
+  router.post('/columns', express.json(), (req, res) => {
+    userConfig.columns = req.body;
     saveUserConfig(userConfig);
     console.log('User config updated');
     res.sendStatus(204);

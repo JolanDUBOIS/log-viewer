@@ -1,5 +1,5 @@
 import { get } from 'svelte/store';
-import { userConfig } from '../stores/configStore.js';
+import { userConfigColumns } from '../stores/configStore.js';
 import { sessionFilters } from '../stores/sessionStore.js';
 
 const allowedTypes = ['text', 'datetime', 'number', 'category'];
@@ -8,14 +8,14 @@ export async function initializeSessionParams(logs) {
   console.log('Initializing session parameters...');
 
   // Suppose that userConfig is already initialized (TODO - How do I ensure this?)
-  const currentUserConfig = get(userConfig);
+  const currentUserConfigColumns = get(userConfigColumns);
   const currentFilters = get(sessionFilters);
 
   const newFilters = { ...currentFilters };
 
-  for (const col of Object.keys(currentUserConfig)) {
+  for (const col of Object.keys(currentUserConfigColumns)) {
     const filterVal = currentFilters[col];
-    const colType = currentUserConfig[col]?.type;
+    const colType = currentUserConfigColumns[col]?.type;
 
     // If sessionFilters[col] exists and is one of allowed types, do nothing
     if (

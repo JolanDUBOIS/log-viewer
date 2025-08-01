@@ -15,7 +15,7 @@
     sortOrder 
   } from './stores/logStore.js';
   import { isSidePanelOpen } from './stores/uiStore.js';
-  import { loadUserConfig, userConfig } from './stores/configStore.js';
+  import { loadUserConfigColumns, userConfigColumns } from './stores/configStore.js';
   import { loadHistory } from './stores/historyStore.js';
   import { loadSessionFilters, sessionFilters } from './stores/sessionStore.js';
 
@@ -28,7 +28,7 @@
   $: {
     const result = applyAllFilters($logs, {
       sessionFilters: $sessionFilters,
-      userConfig: $userConfig,
+      userConfig: $userConfigColumns,
     });
 
     filteredLogs.set(result);
@@ -37,7 +37,7 @@
   $: {
     const sortedLogs = sortLogs($filteredLogs, {
       order: $sortOrder,
-      userConfig: $userConfig,
+      userConfig: $userConfigColumns,
     });
     displayedLogs.set(sortedLogs);
   }
@@ -47,7 +47,7 @@
   }
 
   onMount(async () => {
-    await loadUserConfig();
+    await loadUserConfigColumns();
     await loadHistory();
     await loadSessionFilters();
     await initializeLogs();

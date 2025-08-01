@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 import { COLUMN_SIZE_LIMITS } from '../constants.js';
 import { logs, columnWidths, filterDropdownState, logColumns, loadLogs } from '../stores/logStore.js';
-import { userConfig } from '../stores/configStore.js';
+import { userConfigColumns } from '../stores/configStore.js';
 import { initializeSessionParams } from './sessionHelpers.js';
 
 function initializeColumnWidths(logs) {
@@ -36,11 +36,11 @@ function initializeColumnWidths(logs) {
   columnWidths.set(newWidths);
 }
 
-function initializeUserConfig(logs) {
+function initializeUserConfigColumns(logs) {
   console.log('Initializing userConfig...');
   const columns = logs.length > 0 ? Object.keys(logs[0]) : [];
 
-  userConfig.update(config => {
+  userConfigColumns.update(config => {
     const updatedConfig = { ...config };
 
     for (const col of columns) {
@@ -84,6 +84,6 @@ export async function initializeLogs() {
   filterDropdownState.set(Object.fromEntries(logColSchema.map(k => [k, { position: { top: 0, left: 0 } , buttonHovered: false, dropdownHovered: false }])));
 
   initializeColumnWidths(parsedLogs);
-  initializeUserConfig(parsedLogs);
+  initializeUserConfigColumns(parsedLogs);
   await initializeSessionParams(parsedLogs);
 }
