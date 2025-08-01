@@ -53,18 +53,22 @@ app.listen(port, () => {
   console.log(`Log viewer running at ${url}`);
 });
 
+const isDev = cliArgs.includes('--dev');
+const frontendPort = isDev ? 5173 : port;
+const frontendUrl = `http://localhost:${frontendPort}`
+
 if (cliArgs.includes('--app')) {  // if (cliArgs.includes('--app') || userConfig.openInChromeless) for when I change userConfig structure
   let launchCmd;
 
   if (os.platform() === 'win32') {
-    launchCmd = `start chrome --app="${url}"`;  // Native Windows (not WSL)
+    launchCmd = `start chrome --app="${frontendUrl}"`;  // Native Windows (not WSL)
   } else if (os.platform() === 'darwin') {
-    launchCmd = `open -a "Google Chrome" --args --app="${url}"`;  // macOS
+    launchCmd = `open -a "Google Chrome" --args --app="${frontendUrl}"`;  // macOS
   } else if (os.platform() === 'linux') {
     // WSL2 workaround — assumes Chrome is installed on Windows and accessible via this path
     // TODO - differentiate between WSL and native Linux
-    launchCmd = `/mnt/c/Program\\ Files/Google/Chrome/Application/chrome.exe --app="${url}"`;
-    // Real linux would use: launchCmd = `google-chrome --app="${url}"`
+    launchCmd = `/mnt/c/Program\\ Files/Google/Chrome/Application/chrome.exe --app="${frontendUrl}"`;
+    // Real linux would use: launchCmd = `google-chrome --app="${frontendUrl}"`
   } else {
     console.warn('Unsupported platform for launching Chrome in app mode');
   }
