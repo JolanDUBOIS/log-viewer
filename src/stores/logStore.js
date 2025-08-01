@@ -14,7 +14,7 @@ export const logColumns = writable([]); // Array of column names to display in t
 
 export async function loadLogs() {
   try {
-    const res = await fetch('/api/log');
+    const res = await fetch('/api/logs');
     if (!res.ok) throw new Error('Failed to fetch log file');
 
     const text = await res.text();

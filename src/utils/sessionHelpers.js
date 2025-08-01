@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import { userConfig } from '../stores/configStore.js';
-import { sessionColumnFilters } from '../stores/sessionStore.js';
+import { sessionFilters } from '../stores/sessionStore.js';
 
 const allowedTypes = ['text', 'datetime', 'number', 'category'];
 
@@ -9,7 +9,7 @@ export async function initializeSessionParams(logs) {
 
   // Suppose that userConfig is already initialized (TODO - How do I ensure this?)
   const currentUserConfig = get(userConfig);
-  const currentFilters = get(sessionColumnFilters);
+  const currentFilters = get(sessionFilters);
 
   const newFilters = { ...currentFilters };
 
@@ -17,7 +17,7 @@ export async function initializeSessionParams(logs) {
     const filterVal = currentFilters[col];
     const colType = currentUserConfig[col]?.type;
 
-    // If sessionColumnFilters[col] exists and is one of allowed types, do nothing
+    // If sessionFilters[col] exists and is one of allowed types, do nothing
     if (
       filterVal &&
       allowedTypes.includes(colType) &&
@@ -39,7 +39,7 @@ export async function initializeSessionParams(logs) {
     }
   }
 
-  sessionColumnFilters.set(newFilters);
+  sessionFilters.set(newFilters);
 }
 
 // Helper to check if filterVal looks valid for the given type
