@@ -61,7 +61,7 @@ export async function deleteHistoryItem(itemPath) {
 
 export async function loadCurrentPath() {
   try {
-    const res = await fetch('/api/current-path');
+    const res = await fetch('/api/session/path');
     if (res.ok) {
       const data = await res.json();
       currentPath.set(data.path);
@@ -76,7 +76,7 @@ export async function loadCurrentPath() {
 
 export async function updateCurrentPath(newPath) {
   try {
-    const res = await fetch('/api/current-path', {
+    const res = await fetch('/api/session/path', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: newPath }),

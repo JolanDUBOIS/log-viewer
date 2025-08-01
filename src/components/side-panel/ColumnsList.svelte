@@ -2,22 +2,22 @@
   import { get } from 'svelte/store';
   import { tick } from 'svelte'; // Import tick
   import { logColumns } from '../../stores/logStore.js';
-  import { userConfig, updateAndSaveUserConfig } from '../../stores/configStore.js';
+  import { userConfigColumns, updateAndSaveUserConfigColumns } from '../../stores/configStore.js';
   import TypeButton from './TypeButton.svelte';
 
   let colEditMode = null;
   let inputRefs = {}; // Store references to input elements
 
   function toggleVisibility(columnKey) {
-    const currentConfig = get(userConfig);
-    const newUserConfig = {
+    const currentConfig = get(userConfigColumns);
+    const newuserConfigColumns = {
       ...currentConfig,
       [columnKey]: {
         ...currentConfig[columnKey],
         shown: !currentConfig[columnKey]?.shown
       }
     };
-    updateAndSaveUserConfig(newUserConfig);
+    updateAndSaveUserConfigColumns(newuserConfigColumns);
   }
 
   async function enterEditMode(columnKey) {
@@ -43,29 +43,29 @@
   }
 
   function saveAlias(colKey, newAlias) {
-    const currentConfig = get(userConfig);
-    const updatedConfig = {
-      ...currentConfig,
+    const currentConfigColumns = get(userConfigColumns);
+    const updatedConfigColumns = {
+      ...currentConfigColumns,
       [colKey]: {
-        ...currentConfig[colKey],
+        ...currentConfigColumns[colKey],
         alias: newAlias
       }
     };
-    updateAndSaveUserConfig(updatedConfig);
+    updateAndSaveUserConfigColumns(updatedConfigColumns);
   }
 
   function toggleOrderBy(columnKey) {
-    const currentConfig = get(userConfig);
-    const newUserConfig = {};
+    const currentConfig = get(userConfigColumns);
+    const newuserConfigColumns = {};
 
     for (const key in currentConfig) {
-      newUserConfig[key] = {
+      newuserConfigColumns[key] = {
         ...currentConfig[key],
         orderBy: key === columnKey
       };
     }
 
-    updateAndSaveUserConfig(newUserConfig);
+    updateAndSaveUserConfigColumns(newuserConfigColumns);
   }
 </script>
 
@@ -73,7 +73,7 @@
   {#each $logColumns as colKey}
     <div class="column-item">
       <button class="show-filter-toggle-button" on:click={() => toggleVisibility(colKey)} aria-label="Toggle visibility" title="Toggle visibility">
-        {#if $userConfig[colKey].shown}
+        {#if $userConfigColumns[colKey].shown}
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
           <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
           <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clip-rule="evenodd" />
@@ -91,14 +91,14 @@
           <input 
             type="text" 
             class="alias-input" 
-            value={$userConfig[colKey].alias} 
+            value={$userConfigColumns[colKey].alias} 
             placeholder="Edit alias" 
             bind:this={inputRefs[colKey]}
             on:keydown={(event) => handleInputKeydown(event, colKey)} 
             on:blur={(event) => handleInputBlur(colKey, event)}
           />
         {:else}
-          <span>{$userConfig[colKey].alias}</span>
+          <span>{$userConfigColumns[colKey].alias}</span>
         {/if}
       </div>
 
@@ -116,10 +116,10 @@
 
       <button 
         class="toggle-orderBy-button" 
-        on:click={() => !$userConfig[colKey].orderBy && toggleOrderBy(colKey)} 
+        on:click={() => !$userConfigColumns[colKey].orderBy && toggleOrderBy(colKey)} 
         aria-label="Toggle order by" 
         title="Toggle order by"
-        class:disabled={$userConfig[colKey].orderBy}
+        class:disabled={$userConfigColumns[colKey].orderBy}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-up-icon lucide-arrow-down-up">
           <path d="m3 16 4 4 4-4"/>
