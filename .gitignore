@@ -38,3 +38,7 @@ local-tests/
 
 # Config files
 config/
+!server-flask/config/
+
+# Cache
+__pycache__/
