@@ -26,7 +26,6 @@ export function loadUserConfig() {
   console.log('Loaded user config file:', USER_CONFIG_PATH);
   try {
     const parsed = JSON.parse(raw);
-    // console.log('Parsed config:', parsed);
     return parsed;
   } catch (e) {
     console.error('Failed to parse user config JSON:', e);
