@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from . import logger
 from .history import HistoryManager
 from ..state import SessionState
 from ..models import FileRecord
@@ -14,10 +15,12 @@ class ActiveFileManager:
 
     def get(self) -> FileRecord | None:
         """ Returns the currently active file in the session. """
+        logger.info("Getting active file from session")
         return self.session.active_file
 
     def set(self, file_record: FileRecord) -> None:
         """ Sets the currently active file in the session. """
+        logger.info(f"Setting active file: {file_record.path}")
         file_record.update_read_at()
         self.session.active_file = file_record
         self.history_manager.add(file_record)
@@ -29,4 +32,5 @@ class ActiveFileManager:
 
     def clear(self) -> None:
         """ Clears the currently active file in the session. """
+        logger.info("Clearing active file from session")
         self.session.active_file = None

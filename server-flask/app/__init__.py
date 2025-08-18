@@ -7,7 +7,7 @@ from .core.state import SessionState
 from .core.services import FileSessionService, LogService
 from .core.managers import ActiveFileManager, HistoryManager, ColumnsManager
 
-def create_app():
+def create_app(file: str = None) -> Flask:
     app = Flask(__name__)
 
     # Session state
@@ -17,6 +17,10 @@ def create_app():
     history_manager = HistoryManager(session_state)
     active_file_manager = ActiveFileManager(session_state, history_manager)
     columns_manager = ColumnsManager(session_state)
+
+    # Load initial state from file if provided
+    if file:
+        active_file_manager.set_by_path(file)
 
     # Services
     file_session_service = FileSessionService(active_file_manager)

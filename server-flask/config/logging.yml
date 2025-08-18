@@ -36,22 +36,22 @@ handlers:
 loggers:
   app:
     level: DEBUG
-  
-  app.routes:
-    level: DEBUG
-  
+
   app.core:
     level: DEBUG
-  
+
+  app.routes:
+    level: DEBUG
+
   app.core.managers:
     level: DEBUG
 
   app.core.models:
     level: DEBUG
-  
+
   app.core.services:
     level: DEBUG
-  
+
   app.core.state:
     level: DEBUG
 

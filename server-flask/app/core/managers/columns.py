@@ -26,6 +26,7 @@ class ColumnsManager:
         """ Adds a Column to the session state. If name already exists, it will be replaced. """
         self.session.columns = [col for col in self.session.columns if col.name != column.name]
         self.session.columns.append(column)
+        self.save()
         return column
 
     def load(self) -> None:

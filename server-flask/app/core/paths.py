@@ -11,3 +11,8 @@ CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 COLUMNS_CONFIG_PATH = CACHE_DIR / "column_config.json"
 LOG_HISTORY_PATH = CACHE_DIR / "log_history.json"
 APP_CONFIG_PATH = CONFIG_DIR / "app_config.json"
+
+## Dev note:
+# ~/.cache/logviewer/column_config.json
+# ~/.cache/logviewer/log_history.json
+# ~/.config/logviewer/app_config.json

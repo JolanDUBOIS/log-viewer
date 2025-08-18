@@ -22,6 +22,7 @@ class HistoryManager:
         """ Adds a FileRecord to the history. If it already exists, it will be replaced. """
         self.session.history.add(file_record)
         logger.info(f"Added FileRecord to history: {file_record}")
+        self.save()
 
     def add_from_dict(self, file_data: dict) -> FileRecord:
         """ Adds a FileRecord to the history from a dictionary. """
@@ -33,6 +34,7 @@ class HistoryManager:
         """ Removes a FileRecord from the history. """
         self.session.history.remove(file_record)
         logger.info(f"Removed FileRecord from history: {file_record}")
+        self.save()
 
     def remove_by_path(self, path: str | Path) -> FileRecord | None:
         """ Removes a FileRecord from the history by its path. """
