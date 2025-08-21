@@ -31,7 +31,7 @@ class FileRecordsCollection:
                 return record
         return None
 
-    def add(self, record: FileRecord):
+    def set(self, record: FileRecord):
         """ Add a FileRecord to the collection. If it already exists, it will be replaced. """
         if record in self.records:
             self.records.remove(record)  # remove by value, not index
@@ -51,6 +51,15 @@ class FileRecordsCollection:
         """ Returns a sorted list of FileRecords based on a specified key. """
         return sorted(self.records, key=lambda r: getattr(r, key), reverse=reverse)
 
+    def has(self, path: str | Path) -> bool:
+        """ Check if a record with the given path exists in the collection. """
+        try:
+            path = Path(path).expanduser().resolve()
+            return any(r.path == path for r in self.records)
+        except Exception as e:
+            logger.error(f"Error checking if path exists in collection: {e}")
+            return False
+
     def to_list(self) -> list[dict]:
         """ Convert the collection of FileRecords to a list of dictionaries. """
         return [record.to_dict() for record in self.records]
@@ -61,5 +70,5 @@ class FileRecordsCollection:
         collection = cls()
         for record_data in records:
             record = FileRecord.from_dict(record_data)
-            collection.add(record)
+            collection.set(record)
         return collection
