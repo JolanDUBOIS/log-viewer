@@ -1,4 +1,4 @@
-from ..models import Column, FileRecord, FileRecordsCollection
+from ..models import Column, FileRecord, FileRecordsCollection, LogsData
 
 
 class SessionState:
@@ -8,3 +8,9 @@ class SessionState:
         self.history: FileRecordsCollection = FileRecordsCollection()
         self.active_file: FileRecord | None = None
         self.columns: list[Column] = []
+        self.sorting_column: str | None = None
+        self.logs: LogsData | None = None
+
+    def has_column(self, col_name: str) -> bool:
+        """ Return True if a column with this name exists. """
+        return any(col.name == col_name for col in self.columns)
