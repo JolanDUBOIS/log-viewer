@@ -39,7 +39,7 @@ def update_column():
         return jsonify({"error": "Invalid column data"}), 400
 
     try:
-        column = Column.from_dict(data)
+        column = Column.from_dict(data) # TODO - Create an add_from_dict method in ColumnsManager and remove the call to Column here
     except Exception as e:
         logger.error(f"Failed to create Column from data: {e}")
         return jsonify({"error": "Invalid column data provided"}), 400

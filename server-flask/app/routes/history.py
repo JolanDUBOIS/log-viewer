@@ -1,5 +1,4 @@
 from typing import cast
-
 from flask import request, jsonify
 from flask import current_app as flask_current_app
 
@@ -9,51 +8,48 @@ from ..app_types import MyApp
 
 current_app: MyApp = cast(MyApp, flask_current_app)
 
-@session_routes.get('/history')
+@session_routes.get("/history")
 def get_history():
-    logger.info("Fetching session history")
     try:
-        history = current_app.history_manager.get()
-        if not history:
-            logger.error("History data not found or empty")
-            return jsonify({"error": "No history available"}), 404
-        return jsonify({"history": history.to_list()}), 200
+        history_list = current_app.fc_service.get_history()
+        return jsonify({"history": history_list}), 200
     except Exception as e:
         logger.error(f"Failed to fetch history: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
-@session_routes.post('/history/add')
-def add_to_history():
-    logger.info("Adding file record to history")
-    data = request.json
-    if not data:
-        logger.error("No JSON payload provided")
-        return jsonify({"error": "Missing JSON payload"}), 400
+@session_routes.get("/history/<path:file_path>")
+def get_history_item(file_path: str):
     try:
-        file_record = current_app.history_manager.add_from_dict(data)
-        if not file_record:
-            logger.error("Failed to add file record to history")
-            return jsonify({"error": "Failed to add file record"}), 400
-        return jsonify(file_record.to_dict()), 201
+        items = current_app.fc_service.get_history(file_path)
+        if not items:
+            return jsonify({"error": "FileRecord not found"}), 404
+        return jsonify(items[0].to_dict()), 200
     except Exception as e:
-        logger.error(f"Error adding file record to history: {e}")
+        logger.error(f"Failed to fetch history item {file_path}: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
-@session_routes.delete('/history/remove')
-def remove_from_history():
-    logger.info("Removing file record from history")
+@session_routes.put("/history/<path:file_path>")
+def update_history_item(file_path: str):
     data = request.json
-    if not data or "path" not in data:
-        logger.error("No path provided in request")
-        return jsonify({"error": "No path provided"}), 400
-    path = data["path"]
+    if not data:
+        return jsonify({"error": "Missing JSON payload"}), 400
+    data["path"] = file_path  # ensure the dict has the correct path
     try:
-        file_record = current_app.history_manager.remove_by_path(path)
-        if file_record:
-            return jsonify(file_record.to_dict()), 200
-        else:
-            logger.error(f"FileRecord with path {path} not found in history.")
+        updated = current_app.fc_service.update_history(data)
+        if not updated:
             return jsonify({"error": "FileRecord not found"}), 404
+        return jsonify(updated.to_dict()), 200
     except Exception as e:
-        logger.error(f"Error removing file record from history: {e}")
+        logger.error(f"Error updating file record {file_path}: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@session_routes.delete("/history/<path:file_path>")
+def delete_history_item(file_path: str):
+    try:
+        removed = current_app.fc_service.remove_from_history(file_path)
+        if not removed:
+            return jsonify({"error": "FileRecord not found"}), 404
+        return jsonify(removed.to_dict()), 200
+    except Exception as e:
+        logger.error(f"Error removing file record {file_path}: {e}")
         return jsonify({"error": "Internal server error"}), 500
