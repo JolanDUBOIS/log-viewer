@@ -18,36 +18,51 @@ class HistoryManager:
         """ Returns the history of file records. """
         return self.session.history
 
-    def add(self, file_record: FileRecord) -> None:
-        """ Adds a FileRecord to the history. If it already exists, it will be replaced. """
-        self.session.history.add(file_record)
+    def get_by_path(self, path: str | Path) -> FileRecord | None:
+        """ Returns a FileRecord from history by its path. """
+        return self.session.history.get(path)
+
+    def set(self, file_record: FileRecord) -> None:
+        """ Adds or replaces a FileRecord in the history. """
+        self.session.history.set(file_record)
         logger.info(f"Added FileRecord to history: {file_record}")
         self.save()
 
-    def add_from_dict(self, file_data: dict) -> FileRecord:
-        """ Adds a FileRecord to the history from a dictionary. """
-        file_record = FileRecord(**file_data)
-        self.add(file_record)
-        return file_record
+    def set_from_dict(self, file_data: dict) -> FileRecord:
+        """ Adds or replaces a FileRecord in the history from a dictionary. """
+        try:
+            file_record = FileRecord(**file_data)
+            self.set(file_record)
+            return file_record
+        except Exception as e:
+            logger.error(f"Failed to create FileRecord from data: {e}")
+            raise ValueError("Invalid file data provided.")
 
-    def remove(self, file_record: FileRecord) -> None:
-        """ Removes a FileRecord from the history. """
+    def remove(self, file: FileRecord | str | Path) -> FileRecord | None:
+        """ Removes a FileRecord from the history by object or path. """
+        if isinstance(file, FileRecord):
+            file_record = file
+        else:
+            file_record = self.session.history.get(file)
+
+        if not file_record or not self.session.history.has(file_record):
+            logger.warning(f"FileRecord {file} not found in history.")
+            return None
+
         self.session.history.remove(file_record)
         logger.info(f"Removed FileRecord from history: {file_record}")
         self.save()
+        return file_record
 
-    def remove_by_path(self, path: str | Path) -> FileRecord | None:
-        """ Removes a FileRecord from the history by its path. """
-        file_record = self.session.history.get(path)
-        if file_record:
-            self.remove(file_record)
-            return file_record
-        else:
-            logger.warning(f"FileRecord with path {path} not found in history.")
+    def has(self, file: FileRecord | str | Path) -> bool:
+        """ Checks if a FileRecord has in the history by object or path. """
+        if isinstance(file, FileRecord):
+            return self.session.history.has(file.path)
+        return self.session.history.has(file)
 
     def load(self) -> None:
         """ Loads the history from the log history file. """
-        if not self.history_path.exists():
+        if not self.history_path.has():
             logger.info(f"Log history file {self.history_path} does not exist. Creating a new one.")
             self.history_path.write_text("[]")
             self.session.history = FileRecordsCollection()
