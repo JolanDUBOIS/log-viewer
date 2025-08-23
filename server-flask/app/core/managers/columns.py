@@ -39,6 +39,7 @@ class ColumnsManager:
         try:
             with self.col_config_path.open('r', encoding='utf-8') as file:
                 data = file.read()
+                logger.debug(f"Column config data read: {data}")
                 self.session.columns = [Column(**col) for col in json.loads(data)]
                 logger.info(f"Columns loaded from {self.col_config_path}")
         except Exception as e:

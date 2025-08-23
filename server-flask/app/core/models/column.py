@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from . import logger
-from .filters import Filter, TextFilter
+from .filters import Filter
 
 
 VALID_TYPES = {"text", "number", "datetime", "category"}
@@ -12,7 +12,7 @@ class Column:
     alias: str | None = None
     visible: bool = True
     type: str = "text"
-    filter: Filter = field(default_factory=TextFilter)
+    filter: Filter = None
 
     def __post_init__(self):
         self.alias = self.alias or self.name
@@ -38,12 +38,15 @@ class Column:
 
     def _validate_filter(self):
         """ Validate the filter type against the column type. """
-        if self.filter is None or not isinstance(self.filter, Filter):
+        if self.filter is None:
+            self.filter = Filter.from_dict(self.type, {})
+            return
+        if not isinstance(self.filter, Filter):
             logger.error(f"Invalid filter: {self.filter}. Must be an instance of Filter.")
             raise ValueError(f"Invalid filter: {self.filter}. Must be an instance of Filter.")
         if self.type != self.filter._type:
-            logger.error(f"Column type '{self.type}' does not match filter type '{self.filter._type}' if a filter is set.")
-            raise ValueError(f"Column type '{self.type}' does not match filter type '{self.filter._type}' if a filter is set.")
+            logger.warning(f"Column type '{self.type}' does not match filter type '{self.filter._type}'. Resetting filter to empty filter.")
+            self.filter = Filter.from_dict(self.type, {})
 
     def __repr__(self):
         return (f"Column(name={self.name}, alias={self.alias}, visible={self.visible}, "
@@ -77,5 +80,5 @@ class Column:
             alias=data.get("alias"),
             visible=data.get("visible", True),
             type=col_type,
-            filter=Filter.from_dict(col_type, data["filter"])
+            filter=Filter.from_dict(col_type, data.get("filter", {}))
         )

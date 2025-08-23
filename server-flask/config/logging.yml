@@ -34,26 +34,31 @@ handlers:
     formatter: json
 
 loggers:
-  app:
+  server-flask.app:
     level: DEBUG
 
-  app.core:
+  server-flask.app.core:
     level: DEBUG
 
-  app.routes:
+  server-flask.app.routes:
     level: DEBUG
 
-  app.core.managers:
+  server-flask.app.core.managers:
     level: DEBUG
 
-  app.core.models:
+  server-flask.app.core.models:
     level: DEBUG
 
-  app.core.services:
+  server-flask.app.core.services:
     level: DEBUG
 
-  app.core.state:
+  server-flask.app.core.state:
     level: DEBUG
+
+  werkzeug:
+    level: INFO
+    handlers: [console_handler]   # only console, no file handlers
+    propagate: false
 
 root:
   level: DEBUG

@@ -29,20 +29,23 @@ class ActiveFileManager:
 
     def set_by_path(self, path: Path | str) -> FileRecord:
         """ Sets the currently active file in the session by its path. """
-        file_record = FileRecord(path=Path(path))
-        return self.set(file_record)
+        try:
+            file_record = FileRecord(path=Path(path))
+            logger.debug(f"Created FileRecord from path: {file_record}")
+            return self.set(file_record)
+        except Exception as e:
+            logger.error(f"Failed to create FileRecord from path: {e}")
+            raise ValueError("Invalid file path provided.")
 
     def set_by_dict(self, file_data: dict) -> FileRecord:
         """ Sets the currently active file in the session using a file data dict. """
         try:
             file_record = FileRecord.from_dict(file_data)
+            logger.debug(f"Created FileRecord from data: {file_record}")
+            return self.set(file_record)
         except Exception as e:
             logger.error(f"Failed to create FileRecord from data: {e}")
             raise ValueError("Invalid file data provided.")
-        return self.set(file_record)
-
-    def set_by_dict(self, file_data: dict) -> FileRecord:
-        """ Sets the currently active file in the session using a file data dict. """
 
     def clear(self) -> None:
         """ Clears the currently active file in the session. """

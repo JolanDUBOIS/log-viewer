@@ -2,10 +2,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from pathlib import Path
 
+from ..models import FileRecordsCollection
+
 from . import logger
 if TYPE_CHECKING:
     from ..managers import ActiveFileManager, HistoryManager, LogsManager
-    from ..models import FileRecord
+    from ..models import FileRecord, LogsData
 
 
 class FileCoordinatorService:
@@ -16,18 +18,18 @@ class FileCoordinatorService:
         self.history_manager = history_manager
         self.logs_manager = logs_manager
 
-    def get_active_file(self) -> None:
+    def get_active_file(self) -> FileRecord | None:
         """ Returns the currently active file record. """
         return self.active_file_manager.get()
 
-    def get_history(self, path: str | Path | None = None) -> list[FileRecord]:
+    def get_history(self, path: str | Path | None = None) -> FileRecordsCollection | None:
         """ Returns the history of file records, optionally filtered by path. """
         if path:
             file_record = self.history_manager.get_by_path(path)
-            return [file_record] if file_record else []
-        return self.history_manager.get().to_list()
+            return FileRecordsCollection([file_record]) if file_record else None
+        return self.history_manager.get()
 
-    def get_logs(self) -> None:
+    def get_logs(self) -> LogsData | None:
         """ Returns the logs data for the currently active file. """
         return self.logs_manager.get()
 

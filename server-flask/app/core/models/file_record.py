@@ -13,7 +13,7 @@ class FileRecord:
     read_at: str | None = None
 
     def __post_init__(self):
-        self.path = self.path.expanduser().resolve()
+        self.path = Path(self.path).expanduser().resolve()
         self.alias = self.alias or self._alias_from_path()
         self.read_at = self.read_at or datetime.now().isoformat()
         self._check_read_at()

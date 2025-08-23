@@ -8,8 +8,8 @@ from .file_record import FileRecord
 class FileRecordsCollection:
     """ A collection of FileRecord instances, providing methods to manage and query them. """
 
-    def __init__(self):
-        self.records: list[FileRecord] = []
+    def __init__(self, records: list[FileRecord] | None = None):
+        self.records: list[FileRecord] = records or []
 
     def __contains__(self, record: FileRecord) -> bool:
         """ Check if a FileRecord is in the collection. """
@@ -22,6 +22,10 @@ class FileRecordsCollection:
     def __iter__(self):
         """ Iterate over the FileRecords in the collection. """
         return iter(self.records)
+
+    def __getitem__(self, index: int) -> FileRecord:
+        """ Retrieve a FileRecord by its index. """
+        return self.records[index]
 
     def get(self, path: str | Path) -> FileRecord | None:
         """ Get a FileRecord by its path. Returns None if not found. """

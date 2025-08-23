@@ -19,6 +19,9 @@ class LogsData:
             self._columns = list(first_row.keys())
         return self._columns
 
+    def as_string(self) -> str:
+        return "".join(self.lines)
+
     def __len__(self) -> int:
         return len(self.lines)
 

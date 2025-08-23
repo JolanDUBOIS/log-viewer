@@ -2,6 +2,9 @@ from . import logger
 from ..state import SessionState
 
 
+class InvalidColumnError(ValueError):
+    pass
+
 class SortingColumnManager:
     """ TODO """
 
@@ -17,7 +20,7 @@ class SortingColumnManager:
         """ Sets the sorting column in the session. """
         if not self._check_valid_column(column):
             logger.error(f"Invalid column '{column}', cannot set as sorting column.")
-            return
+            raise InvalidColumnError(f"Invalid column '{column}', cannot set as sorting column.")
         logger.info(f"Setting sorting column: {column}")
         self.session.sorting_column = column
 

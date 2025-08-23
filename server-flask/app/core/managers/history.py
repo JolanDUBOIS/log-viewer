@@ -62,7 +62,7 @@ class HistoryManager:
 
     def load(self) -> None:
         """ Loads the history from the log history file. """
-        if not self.history_path.has():
+        if not self.history_path.exists():
             logger.info(f"Log history file {self.history_path} does not exist. Creating a new one.")
             self.history_path.write_text("[]")
             self.session.history = FileRecordsCollection()
