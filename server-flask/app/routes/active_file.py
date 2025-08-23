@@ -1,4 +1,5 @@
 from typing import cast
+import traceback
 
 from flask import request, jsonify
 from flask import current_app as flask_current_app
@@ -17,8 +18,8 @@ def get_active_file():
         return jsonify(active_file.to_dict() if active_file else None), 200
     except Exception as e:
         logger.error(f"Failed to fetch active file: {e}")
+        logger.debug(traceback.format_exc())
         return jsonify({"error": "Failed to fetch active file"}), 500
-
 
 @session_routes.post("/active-file")
 def set_active_file():
@@ -33,7 +34,11 @@ def set_active_file():
         return jsonify(file_record.to_dict()), 200
     except ValueError as e:
         logger.warning(f"Failed to set active file: {e}")
+        logger.debug(traceback.format_exc())
         return jsonify({"error": str(e)}), 400
     except Exception as e:
         logger.error(f"Error setting active file: {e}")
+        logger.debug(traceback.format_exc())
         return jsonify({"error": "Internal server error"}), 500
+
+# TODO - Clear active file route

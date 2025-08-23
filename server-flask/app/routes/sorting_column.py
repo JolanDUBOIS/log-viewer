@@ -1,10 +1,13 @@
-from typing import cast
+from typing import cast, TYPE_CHECKING
+import traceback
 
 from flask import request, jsonify
 from flask import current_app as flask_current_app
 
 from . import logger, session_routes
 from ..app_types import MyApp
+if TYPE_CHECKING:
+    from ..core.managers.sorting_column import InvalidColumnError
 
 
 current_app: MyApp = cast(MyApp, flask_current_app)
@@ -15,10 +18,11 @@ def get_sorting_column():
     logger.info("Fetching sorting column")
     try:
         sorting_column = current_app.sorting_column_manager.get()
+        return jsonify({"sorting_column": sorting_column}), 200
     except Exception as e:
         logger.error(f"Error fetching sorting column: {e}")
+        logger.debug(traceback.format_exc())
         return jsonify({"error": "Failed to fetch sorting column"}), 500
-    return jsonify({"sorting_column": sorting_column})
 
 @session_routes.post('/sorting-column')
 def set_sorting_column():
@@ -37,7 +41,12 @@ def set_sorting_column():
 
     try:
         current_app.sorting_column_manager.set(column_name)
+    except InvalidColumnError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         logger.error(f"Error setting sorting column: {e}")
+        logger.debug(traceback.format_exc())
         return jsonify({"error": "Internal server error"}), 500
     return jsonify({"sorting_column": column_name, "status": "success"}), 200
+
+# TODO - Clear sorting column route
