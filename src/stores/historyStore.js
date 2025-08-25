@@ -1,95 +1,58 @@
-import { writable, get } from 'svelte/store';
+import { writable } from 'svelte/store';
+import { getHistory, postAddToHistory, removeFromHistory } from '../api/history';
 
-export const history = writable({ recent: [] });
-export const currentPath = writable('');
-
-// History management
-
-function orderHistoryByLastUsed(historyObj) {
-  return {
-    recent: [...historyObj.recent].sort((a, b) => {
-      const dateA = new Date(a.lastUsed).getTime() || 0;
-      const dateB = new Date(b.lastUsed).getTime() || 0;
-      return dateB - dateA;
-    })
-  };
-}
+export const history = writable([]);
 
 export async function loadHistory() {
   try {
-    const res = await fetch('/api/history');
-    if (res.ok) {
-      let historyData = await res.json();
-      historyData = orderHistoryByLastUsed(historyData); // order before setting
-      console.log('Loaded history:', historyData);
-      history.set(historyData);
-    } else {
-      const errorText = await res.text();
-      console.error('Failed to load history:', res.status, errorText);
-    }
+    const historyData = await getHistory();
+    history.set(historyData.history || historyData);
   } catch (err) {
-    console.error('Fetch error:', err);
+    console.error('Failed to load history:', err);
   }
 }
 
-export async function updateAndSaveHistory(newHistory) {
-  const orderedHistory = orderHistoryByLastUsed(newHistory);
-  history.set(orderedHistory);
-  
-  // Save to backend
-  const res = await fetch('/api/history', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(orderedHistory),
+/**
+ * Adds an item to history store and backend.
+ * @param {{path: string, alias?: string, read_at?: string}} item
+ * @returns {Promise<Object>} The added or updated history item from backend
+ */
+export async function addToHistory(item) {
+  console.log('Adding to history:', item);
+  if (!item || !item.path) {
+    throw new Error('Invalid history item');
+  }
+  const newItem = await postAddToHistory(item);
+  updateHistoryItem(newItem);
+  return newItem;
+}
+
+function updateHistoryItem(newItem) {
+  console.log('Updating history with item:', newItem);
+  history.update(currentHistory => {
+    const existingIndex = currentHistory.findIndex(item => item.path === newItem.path);
+    if (existingIndex !== -1) {
+      const updated = [...currentHistory];
+      updated[existingIndex] = newItem;
+      return updated;
+    } else {
+      return [...currentHistory, newItem];
+    }
   });
-
-  if (!res.ok) {
-    console.error('Failed to save history');
-  }
 }
 
-export async function deleteHistoryItem(itemPath) {
-  const currentHistory = get(history);
-  const updatedHistory = {
-    recent: currentHistory.recent.filter(item => item.path !== itemPath)
-  };
-  
-  await updateAndSaveHistory(updatedHistory);
+export async function deleteHistoryItem(path) {
+  console.log('Deleting history item with path:', path);
+  if (!path) {
+    throw new Error('Invalid path for history item removal');
+  }
+  const deletedItem = await removeFromHistory(path);
+  removeItemFromHistory(deletedItem.path);
+  return deletedItem;
 }
 
-// Current path management
-
-export async function loadCurrentPath() {
-  try {
-    const res = await fetch('/api/session/path');
-    if (res.ok) {
-      const data = await res.json();
-      currentPath.set(data.path);
-    } else {
-      const errorText = await res.text();
-      console.error('Failed to load current path:', res.status, errorText);
-    }
-  } catch (err) {
-    console.error('Fetch error:', err);
-  }
-}
-
-export async function updateCurrentPath(newPath) {
-  try {
-    const res = await fetch('/api/session/path', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: newPath }),
-    });
-
-    if (res.ok) {
-      currentPath.set(newPath);
-      await loadHistory(); // Wait for updated history from backend
-    } else {
-      const errorText = await res.text();
-      console.error('Failed to update current path:', res.status, errorText);
-    }
-  } catch (err) {
-    console.error('Fetch error:', err);
-  }
+function removeItemFromHistory(path) {
+  history.update(currentHistory => {
+    return currentHistory.filter(item => item.path !== path);
+  });
 }
