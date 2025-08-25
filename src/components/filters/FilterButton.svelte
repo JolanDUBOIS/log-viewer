@@ -1,8 +1,8 @@
 <script>
   import { isDropdownVisible } from '../../utils/dropdownHelpers.js';
   import { getDropdownPosition } from '../../utils/uiHelpers.js';
-  import { userConfigColumns } from '../../stores/configStore.js';
-	import { filterDropdownState } from '../../stores/logStore.js';
+  import { columnsMeta } from '../../stores/columnsStore.js';
+	import { filterDropdownState, updateFilterDropdownState } from '../../stores/uiStore.js';
   import CategoryFilterButton from '../filters/CategoryFilterButton.svelte';
   import DatetimeFilterButton from '../filters/DatetimeFilterButton.svelte';
   import TextFilterButton from '../filters/TextFilterButton.svelte';
@@ -10,26 +10,16 @@
   export let colKey;
 
   function setHover(part, value) {
-    filterDropdownState.update(state => ({
-      ...state,
-      [colKey]: {
-        ...state[colKey],
-        [part]: value
-      }
-    }));
+    updateFilterDropdownState(colKey, { [part]: value });
   }
 
   function onButtonMouseEnter(event) {
     setHover('buttonHovered', true);
     const position = getDropdownPosition(event);
-    filterDropdownState.update(state => ({
-      ...state,
-      [colKey]: {
-        ...state[colKey],
-        visible: true,
-        position
-      }
-    }));
+    updateFilterDropdownState(colKey, {
+      visible: true,
+      position
+    });
   }
 </script>
 
@@ -39,29 +29,29 @@
     on:mouseleave={() => setHover('buttonHovered', false)}
     style="width: 100%; display: flex; align-items: center; justify-content: center; font-size: 1rem; padding: 0.2rem 0.5rem;"
   >
-    {$userConfigColumns[colKey].alias}
+    {$columnsMeta[colKey].alias}
   </button>
-  {#if isDropdownVisible(colKey, $filterDropdownState)}
-    <div
-      role="region"
-      class="dropdown"
-      style={`top: ${$filterDropdownState[colKey].position.top}px; left: ${$filterDropdownState[colKey].position.left}px;`}
-      on:mouseenter={() => setHover('dropdownHovered', true)}
-      on:mouseleave={() => setHover('dropdownHovered', false)}
-    >
-      {#if $userConfigColumns[colKey].type === 'category'}
-        <CategoryFilterButton filterKey={colKey}/>
-      {:else if $userConfigColumns[colKey].type === 'datetime'}
-        <DatetimeFilterButton filterKey={colKey}/>
-      {:else if $userConfigColumns[colKey].type === 'text'}
-        <TextFilterButton filterKey={colKey}/>
-      {:else}
-        <!-- Placeholder button for other fields -->
-        <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{$userConfigColumns[colKey].alias}</button>
-      {/if}
-    </div>
-  {/if}
 </div>
+{#if isDropdownVisible(colKey, $filterDropdownState)}
+  <div
+    role="region"
+    class="dropdown"
+    style={`top: ${$filterDropdownState[colKey].position.top}px; left: ${$filterDropdownState[colKey].position.left}px;`}
+    on:mouseenter={() => setHover('dropdownHovered', true)}
+    on:mouseleave={() => setHover('dropdownHovered', false)}
+  >
+    {#if $columnsMeta[colKey].type === 'category'}
+      <CategoryFilterButton filterKey={colKey}/>
+    {:else if $columnsMeta[colKey].type === 'datetime'}
+      <DatetimeFilterButton filterKey={colKey}/>
+    {:else if $columnsMeta[colKey].type === 'text'}
+      <TextFilterButton filterKey={colKey}/>
+    {:else}
+      <!-- Placeholder button for other fields -->
+      <button disabled style="opacity: 0.5; width: 100%; display: flex; align-items: center; justify-content: center;">{$columnsMeta[colKey].alias}</button>
+    {/if}
+  </div>
+{/if}
 
 <style>
   .dropdown {

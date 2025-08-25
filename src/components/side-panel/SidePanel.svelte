@@ -1,14 +1,8 @@
 <script>
   import { headerHeight } from '../../constants.js';
-  import { isSidePanelOpen } from '../../stores/uiStore.js';
+  import { closeSidePanel } from '../../stores/uiStore.js';
   import ColumnsList from './ColumnsList.svelte';
   import LogFilesList from './LogFilesList.svelte';
-
-  function closeSidePanel() {
-    // noop during dev
-    // return;
-    isSidePanelOpen.set(false);
-  }
 </script>
 
 <div 

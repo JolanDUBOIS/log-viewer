@@ -72,3 +72,5 @@ export const LOG_LEVEL_STYLE = {
     fontWeight: FONT_WEIGHT_LIGHT,
   },
 };
+
+export const levelColumn = 'levelname'; // Default level column name

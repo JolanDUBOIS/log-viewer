@@ -1,7 +1,8 @@
 <script>
-  import { headerFontSize, headerHeight } from '../../constants.js';
-  import { logs, displayedLogs, columnWidths, logColumns } from '../../stores/logStore.js';
-  import { userConfigColumns, levelColumn } from '../../stores/configStore.js';
+  import { headerFontSize, headerHeight, levelColumn } from '../../constants.js';
+  import { logs, displayedLogs, logColumns } from '../../stores/logsStore.js';
+  import { columnWidths } from '../../stores/uiStore.js';
+  import { columnsMeta } from '../../stores/columnsStore.js';
   import TableCell from './TableCell.svelte';
   import FilterButton from '../filters/FilterButton.svelte';
 
@@ -42,7 +43,7 @@
   <thead>
     <tr style={`position: sticky; top: calc(${headerHeight} - 2px); background: #fff; z-index: 1;`}>
       {#each $logColumns as colKey}
-        {#if $userConfigColumns[colKey].shown}
+        {#if $columnsMeta[colKey].visible}
           <th style={`width: ${$columnWidths[colKey] || 'auto'}; position: relative; font-size: ${headerFontSize}; border: 2px solid #ccc;`}>
             <FilterButton colKey={colKey} />
             <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -66,11 +67,11 @@
       {#each $displayedLogs as log}
         <tr>
           {#each $logColumns as colKey}
-            {#if $userConfigColumns[colKey].shown}
+            {#if $columnsMeta[colKey].visible}
             <TableCell 
               width={$columnWidths[colKey] || 'auto'} 
               value={log[colKey]}
-              rowLevel={log[$levelColumn]}
+              rowLevel={log[levelColumn]}
             ></TableCell>
             {/if}
           {/each}

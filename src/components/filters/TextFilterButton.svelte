@@ -1,6 +1,6 @@
 <script>
   import { get } from 'svelte/store';
-  import { updateSessionFilters, sessionFilters } from '../../stores/sessionStore.js';
+  import { columnsMeta, updateAndSaveColumnMeta } from '../../stores/columnsStore.js';
   import ClearTextFieldButton from './ClearTextFieldButton.svelte';
 
   export let filterKey;
@@ -11,43 +11,35 @@
   ];
 
   function updateFilter(key, value) {
-    const currentFilters = get(sessionFilters);
-    const newFilters = { ...currentFilters };
+    const currentColumns = get(columnsMeta);
+    const column = currentColumns[filterKey];
+    if (!column || !column.filter) return;
 
-    if (!newFilters[filterKey]) return; // safety check
-
-    newFilters[filterKey] = {
-      ...newFilters[filterKey],
-      [key]: value
-    };
-
-    updateSessionFilters(newFilters);
+    const newFilter = { ...column.filter, [key]: value };
+    updateAndSaveColumnMeta({ ...column, filter: newFilter });
   }
 
   function clearField(key) {
-    const currentFilters = get(sessionFilters);
-    const newFilters = { ...currentFilters };
+    const currentColumns = get(columnsMeta);
+    const column = currentColumns[filterKey];
+    if (!column || !column.filter) return;
 
-    if (!newFilters[filterKey]) return;
-
-    newFilters[filterKey] = {
-      ...newFilters[filterKey],
-      [key]: ''
-    };
-
-    updateSessionFilters(newFilters);
+    const newFilter = { ...column.filter, [key]: '' };
+    updateAndSaveColumnMeta({ ...column, filter: newFilter });
   }
 </script>
 
 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
   {#each fields as field}
     <div>
-      <label for={`text-${filterKey}-${field.valueKey}`} style="display: block; margin-bottom: 0.3rem;">{field.label}</label>
+      <label for={`text-${filterKey}-${field.valueKey}`} style="display: block; margin-bottom: 0.3rem;">
+        {field.label}
+      </label>
       <div style="position: relative;">
         <input 
           id={`text-${filterKey}-${field.valueKey}`}
           type="text" 
-          value={$sessionFilters[filterKey][field.valueKey]}
+          value={$columnsMeta[filterKey]?.filter?.[field.valueKey] || ''}
           placeholder={field.placeholder}
           style="width: calc(100% - 2.5rem); padding-right: 2rem;"
           on:input={(e) => updateFilter(field.valueKey, e.currentTarget.value)}

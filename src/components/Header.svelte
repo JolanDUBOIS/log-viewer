@@ -1,8 +1,9 @@
 <script>
   import { headerHeight } from '../constants.js';
-  import { filteredLogs, logs, sortOrder } from '../stores/logStore.js'; 
-  import { isSidePanelOpen } from '../stores/uiStore.js';
-  import { loadLogs } from '../stores/logStore.js';
+  import { filteredLogs, logs } from '../stores/logsStore.js'; 
+  import { toggleSidePanel } from '../stores/uiStore.js';
+  import { sortOrder } from '../stores/sortingStore.js';
+  import { refreshLogs } from '../stores/logsStore.js';
 
   let reloading = false;
 
@@ -11,15 +12,10 @@
     sortOrder.update(o => o === 'asc' ? 'desc' : 'asc');
   }
 
-  function toggleSidePanel() {
-    console.log('Toggling side panel');
-    isSidePanelOpen.update(open => !open);
-  }
-
   async function reloadLogs() {
     console.log('Reloading logs');
     reloading = true; // Set reloading to true
-    await loadLogs(); // Fetch new logs
+    await refreshLogs(); // Fetch new logs
     reloading = false; // Reset reloading to false
   }
 </script>
