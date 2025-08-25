@@ -1,3 +1,5 @@
+import { writable, get } from 'svelte/store';
+import { COLUMN_SIZE_LIMITS } from '../constants.js';
 import { activeCellPopup } from "../stores/uiStore";
 
 // For Filter Dropdowns
@@ -34,3 +36,27 @@ export function handleClickOutside(event) {
       activeCellPopup.set(null);
     }
   }
+
+export function calculateColumnWidths(logs) {
+  if (!logs || logs.length === 0) return {};
+
+  const firstRow = logs[0];
+  const newWidths = {};
+
+  for (const column of Object.keys(firstRow)) {
+    const maxContentLength = logs.reduce((max, row) => {
+      const str = row[column] != null ? String(row[column]) : '';
+      return Math.max(max, str.length);
+    }, 0);
+
+    const estimatedWidth = maxContentLength * 8 + 20;
+    const finalWidth = Math.min(
+      COLUMN_SIZE_LIMITS.width.maxCreation,
+      Math.max(COLUMN_SIZE_LIMITS.width.minCreation, estimatedWidth)
+    );
+
+    newWidths[column] = `${finalWidth}px`;
+  }
+
+  return newWidths;
+}
